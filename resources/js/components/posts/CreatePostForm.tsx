@@ -10,15 +10,19 @@ const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/jpg'
 const ALLOWED_VIDEO_TYPES = ['video/mp4', 'video/quicktime', 'video/avi'];
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
+interface MediaItem {
+    file: File;
+    preview: string;
+    type: 'image' | 'video';
+}
+
 export default function CreatePostForm() {
     const [postContent, setPostContent] = useState('');
-    const [media, setMedia] = useState<File | null>(null);
+    const [mediaItems, setMediaItems] = useState<MediaItem[]>([]);
     const [feeling, setFeeling] = useState('');
     const [activity, setActivity] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [showEmojis, setShowEmojis] = useState(false);
-    const [mediaPreview, setMediaPreview] = useState<string | null>(null);
-    const [mediaType, setMediaType] = useState<'image' | 'video' | null>(null);
     const [uploadError, setUploadError] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [isEditing, setIsEditing] = useState(false);
@@ -28,40 +32,55 @@ export default function CreatePostForm() {
     };
 
     const handleMediaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
+        const files = Array.from(e.target.files || []);
+        if (files.length === 0) return;
 
         setUploadError(null);
 
-        // Check file size
-        if (file.size > MAX_FILE_SIZE) {
-            setUploadError('File size should not exceed 5MB');
-            if (fileInputRef.current) fileInputRef.current.value = '';
-            return;
-        }
+        const newMediaItems: MediaItem[] = [];
 
-        // Check file type
-        if (ALLOWED_IMAGE_TYPES.includes(file.type)) {
-            setMediaType('image');
-        } else if (ALLOWED_VIDEO_TYPES.includes(file.type)) {
-            setMediaType('video');
-        } else {
-            setUploadError('Please upload only images (JPG, PNG, GIF) or videos (MP4, MOV, AVI)');
-            if (fileInputRef.current) fileInputRef.current.value = '';
-            return;
-        }
+        files.forEach(file => {
+            // Check file size
+            if (file.size > MAX_FILE_SIZE) {
+                setUploadError('Each file size should not exceed 5MB');
+                return;
+            }
 
-        setMedia(file);
-        setMediaPreview(URL.createObjectURL(file));
+            let type: 'image' | 'video';
+            if (ALLOWED_IMAGE_TYPES.includes(file.type)) {
+                type = 'image';
+            } else if (ALLOWED_VIDEO_TYPES.includes(file.type)) {
+                type = 'video';
+            } else {
+                setUploadError('Please upload only images (JPG, PNG, GIF) or videos (MP4, MOV, AVI)');
+                return;
+            }
+
+            newMediaItems.push({
+                file,
+                preview: URL.createObjectURL(file),
+                type,
+            });
+        });
+
+        setMediaItems(prev => [...prev, ...newMediaItems]);
+        if (fileInputRef.current) fileInputRef.current.value = '';
+    };
+
+    const removeMedia = (index: number) => {
+        setMediaItems(prev => {
+            const newItems = [...prev];
+            URL.revokeObjectURL(newItems[index].preview);
+            newItems.splice(index, 1);
+            return newItems;
+        });
     };
 
     const clearMedia = () => {
-        if (mediaPreview) {
-            URL.revokeObjectURL(mediaPreview);
-        }
-        setMedia(null);
-        setMediaPreview(null);
-        setMediaType(null);
+        mediaItems.forEach(item => {
+            URL.revokeObjectURL(item.preview);
+        });
+        setMediaItems([]);
         if (fileInputRef.current) {
             fileInputRef.current.value = '';
         }
@@ -76,7 +95,10 @@ export default function CreatePostForm() {
 
         const formData = new FormData();
         formData.append('content', postContent);
-        if (media) formData.append('image', media);
+        mediaItems.forEach((item, index) => {
+            formData.append(`media[${index}][file]`, item.file);
+            formData.append(`media[${index}][type]`, item.type);
+        });
         if (feeling) formData.append('feeling', feeling);
         if (activity) formData.append('activity', activity);
 
@@ -92,6 +114,7 @@ export default function CreatePostForm() {
             clearMedia();
             setFeeling('');
             setActivity('');
+            setIsEditing(false);
         } catch (error) {
             console.error('Error creating post:', error);
             setUploadError('Failed to create post. Please try again.');
@@ -155,24 +178,26 @@ export default function CreatePostForm() {
             )}
 
             {/* Media Preview */}
-            {mediaPreview && (
-                <div className="mt-4 mb-3">
-                    <div className="relative max-w-full">
-                        {mediaType === 'image' ? (
-                            <img src={mediaPreview} alt="Selected" className="w-full rounded-lg object-cover" />
-                        ) : (
-                            <video src={mediaPreview} className="w-full rounded-lg" controls />
-                        )}
-                        <button
-                            onClick={clearMedia}
-                            className="absolute top-2 right-2 rounded-full bg-gray-900/70 p-1.5 text-white hover:bg-gray-900/90"
-                            title="Remove media"
-                        >
-                            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                        </button>
-                    </div>
+            {mediaItems.length > 0 && (
+                <div className="mt-4 mb-3 grid grid-cols-2 gap-2">
+                    {mediaItems.map((item, index) => (
+                        <div key={index} className="relative">
+                            {item.type === 'image' ? (
+                                <img src={item.preview} alt="Selected" className="w-full rounded-lg object-cover" />
+                            ) : (
+                                <video src={item.preview} className="w-full rounded-lg" controls />
+                            )}
+                            <button
+                                onClick={() => removeMedia(index)}
+                                className="absolute top-2 right-2 rounded-full bg-gray-900/70 p-1.5 text-white hover:bg-gray-900/90"
+                                title="Remove media"
+                            >
+                                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+                    ))}
                 </div>
             )}
 
@@ -192,6 +217,7 @@ export default function CreatePostForm() {
                             onChange={handleMediaChange}
                             accept={[...ALLOWED_IMAGE_TYPES, ...ALLOWED_VIDEO_TYPES].join(',')}
                             className="hidden"
+                            multiple
                         />
                         <PostActionButton icon="photo" text="Photo/Video" onClick={triggerFileInput} />
                     </label>

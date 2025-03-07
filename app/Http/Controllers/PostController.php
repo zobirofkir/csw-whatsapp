@@ -12,26 +12,35 @@ class PostController extends Controller
     {
         $validated = $request->validate([
             'content' => ['required', 'string', 'max:5000'],
-            'image' => ['nullable', 'file', 'mimes:jpeg,png,jpg,gif,mp4,mov,avi', 'max:5120'], 
+            'media.*.file' => ['nullable', 'file', 'mimes:jpeg,png,jpg,gif,mp4,mov,avi', 'max:5120'],
+            'media.*.type' => ['required_with:media.*.file', 'string', 'in:image,video'],
             'feeling' => ['nullable', 'string', 'max:50'],
             'activity' => ['nullable', 'string', 'max:50'],
         ]);
 
+        // Create the post
         $post = $request->user()->posts()->create([
             'content' => $validated['content'],
             'feeling' => $validated['feeling'] ?? null,
             'activity' => $validated['activity'] ?? null,
         ]);
 
-        if ($request->hasFile('image')) {
-            $file = $request->file('image');
-            $path = $file->store('posts', 'public');
-            $post->update(['image_path' => $path]);
+        // Handle multiple media files
+        if ($request->has('media')) {
+            foreach ($request->media as $media) {
+                if (isset($media['file'])) {
+                    $path = $media['file']->store('posts', 'public');
+                    $post->media()->create([
+                        'path' => $path,
+                        'type' => $media['type']
+                    ]);
+                }
+            }
         }
 
         return response()->json([
             'message' => 'Post created successfully',
-            'post' => $post->load('user'),
+            'post' => $post->load(['user', 'media']),
         ]);
     }
 }
