@@ -31,10 +31,43 @@ export default function Sidebar({ isMobile, showMobileMenu, setShowMobileMenu }:
             <div
                 className={`fixed top-0 z-50 h-screen overflow-y-auto bg-white transition-all duration-300 ease-in-out dark:bg-gray-800 ${
                     isMobile
-                        ? `w-[280px] lg:hidden ${showMobileMenu ? 'translate-x-0 shadow-2xl' : '-translate-x-full'}`
-                        : 'left-0 w-1/4 translate-x-0 border-r border-gray-200 lg:hidden dark:border-gray-700'
+                        ? `w-full ${showMobileMenu ? 'translate-x-0 left-0 shadow-2xl' : '-translate-x-full ml-[-100%]'}`
+                        : 'left-0 hidden w-[300px] translate-x-0 border-r border-gray-200 lg:block dark:border-gray-700'
                 } pt-[72px] pb-20`}
             >
+                <div className="space-y-1 px-3">
+                    <SidebarLink href="/settings/profile">
+                        <ProfileLink />
+                    </SidebarLink>
+                    <SidebarLink href="/friends">
+                        <FriendsLink />
+                    </SidebarLink>
+                    <SidebarLink href="/feed">
+                        <FeedLink />
+                    </SidebarLink>
+                    <SidebarLink href="/watch">
+                        <WatchLink />
+                    </SidebarLink>
+                    <SidebarLink href="/marketplace">
+                        <MarketplaceLink />
+                    </SidebarLink>
+                    <SidebarLink href="/groups">
+                        <GroupsLink />
+                    </SidebarLink>
+                    <SidebarLink href="/gaming">
+                        <GamingLink />
+                    </SidebarLink>
+                    <SidebarLink href="/notifications">
+                        <NotificationsLink count={3} />
+                    </SidebarLink>
+                    <SidebarLink href="/messages">
+                        <MessagesLink count={5} />
+                    </SidebarLink>
+                </div>
+            </div>
+
+            {/* Desktop Sidebar */}
+            <div className="fixed top-0 left-0 z-50 hidden h-screen w-[300px] overflow-y-auto bg-white pt-[72px] pb-20 lg:block dark:bg-gray-800">
                 <div className="space-y-1 px-3">
                     <SidebarLink href="/settings/profile">
                         <ProfileLink />
