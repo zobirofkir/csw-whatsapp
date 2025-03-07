@@ -79,7 +79,10 @@ export default function Navbar({ darkMode, toggleDarkMode, isMobile, showMobileM
                         </button>
                     )}
 
-                    <DarkModeButton darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
+                    <div className='md:hidden block'>
+                        <DarkModeButton darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
+                    </div>
+
 
                     {/* Nav Icons */}
                     <div className="relative">

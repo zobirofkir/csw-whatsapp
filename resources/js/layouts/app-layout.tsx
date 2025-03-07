@@ -16,9 +16,12 @@ export default function AppLayout({ children }: AppLayoutProps) {
 
     useEffect(() => {
         const isDark = localStorage.getItem('darkMode') === 'true';
-        setDarkMode(isDark);
         if (isDark) {
+            setDarkMode(true);
             document.documentElement.classList.add('dark');
+        } else {
+            setDarkMode(false);
+            document.documentElement.classList.remove('dark');
         }
 
         const checkMobile = () => {
