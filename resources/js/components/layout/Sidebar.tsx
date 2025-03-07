@@ -1,7 +1,12 @@
 import { Link } from '@inertiajs/react';
 import { type ReactNode } from 'react';
+import FeedLink from './sidebar/FeedLink';
 import FriendsLink from './sidebar/FriendsLink';
+import GamingLink from './sidebar/GamingLink';
+import GroupsLink from './sidebar/GroupsLink';
+import MarketplaceLink from './sidebar/MarketplaceLink';
 import ProfileLink from './sidebar/ProfileLink';
+import WatchLink from './sidebar/WatchLink';
 
 interface SidebarProps {
     isMobile: boolean;
@@ -22,6 +27,21 @@ export default function Sidebar({ isMobile, showMobileMenu }: SidebarProps) {
                 <SidebarLink href="/friends">
                     <FriendsLink />
                 </SidebarLink>
+                <SidebarLink href="/feed">
+                    <FeedLink />
+                </SidebarLink>
+                <SidebarLink href="/watch">
+                    <WatchLink />
+                </SidebarLink>
+                <SidebarLink href="/marketplace">
+                    <MarketplaceLink />
+                </SidebarLink>
+                <SidebarLink href="/groups">
+                    <GroupsLink />
+                </SidebarLink>
+                <SidebarLink href="/gaming">
+                    <GamingLink />
+                </SidebarLink>
             </div>
         </div>
     );
@@ -29,7 +49,7 @@ export default function Sidebar({ isMobile, showMobileMenu }: SidebarProps) {
 
 function SidebarLink({ href, children }: { href: string; children: ReactNode }) {
     return (
-        <Link href={href} className="flex items-center space-x-2 rounded-lg p-2 font-medium dark:text-white text-gray-700">
+        <Link href={href} className="flex items-center space-x-2 rounded-lg p-2 font-medium text-gray-700 dark:text-white">
             <span>{children}</span>
         </Link>
     );
