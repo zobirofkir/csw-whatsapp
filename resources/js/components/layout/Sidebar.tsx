@@ -74,7 +74,7 @@ export default function Sidebar({ isMobile, showMobileMenu, setShowMobileMenu }:
             )}
 
             {/* Desktop Sidebar */}
-            <div className="sticky top-16 hidden h-[calc(100vh-4rem)] w-[360px] overflow-y-auto px-2 pt-4 lg:block">
+            <div className="sticky top-16 hidden h-[calc(100vh-4rem)] w-[280px] overflow-y-auto px-2 pt-4 lg:block">
                 <nav className="space-y-1">
                     <SidebarLink href="/settings/profile">
                         <ProfileLink />
@@ -107,16 +107,19 @@ function SidebarLink({
     href,
     children,
     method = 'get',
+    as,
 }: {
     href: string;
     children: ReactNode;
     method?: 'get' | 'post' | 'put' | 'patch' | 'delete';
+    as?: string;
 }) {
     return (
         <Link
             href={href}
             method={method}
-            className="flex items-center rounded-lg p-2 font-medium text-[#050505] transition-colors hover:bg-[#E4E6E9] active:bg-[#DCE0E3] dark:text-[#E4E6EB] dark:hover:bg-[#303031] dark:active:bg-[#3A3B3C]"
+            as={as}
+            className="flex items-center rounded-lg p-2 font-medium text-[#65676B] transition-colors hover:bg-[#F2F2F2] active:bg-[#E4E6E9] dark:text-[#B0B3B8] dark:hover:bg-[#3A3B3C] dark:active:bg-[#4E4F50]"
         >
             {children}
         </Link>

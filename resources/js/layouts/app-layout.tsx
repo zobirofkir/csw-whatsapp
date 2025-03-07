@@ -51,9 +51,9 @@ export default function AppLayout({ children }: AppLayoutProps) {
             />
 
             <div className="pt-16">
-                <div className="flex justify-between">
+                <div className="mx-auto flex max-w-[1920px] justify-between px-0">
                     <Sidebar isMobile={isMobile} showMobileMenu={showMobileMenu} setShowMobileMenu={setShowMobileMenu} />
-                    <main className="mx-auto w-full max-w-[744px] px-4 py-4">{children}</main>
+                    <main className="mx-auto w-full max-w-[680px] px-4 py-4">{children}</main>
                     <RightSidebar />
                 </div>
             </div>
