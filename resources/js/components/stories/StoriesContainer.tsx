@@ -1,27 +1,5 @@
+import { SAMPLE_STORIES } from '@/data/sampleStories';
 import Story from './Story';
-
-// Sample data - you might want to move this to a separate file later
-const SAMPLE_STORIES = [
-    {
-        id: '1',
-        imageUrl: '/images/sample/story1.jpg',
-        userName: 'John Doe',
-        userAvatar: '/images/avatars/user1.jpg',
-    },
-    {
-        id: '2',
-        imageUrl: '/images/sample/story2.jpg',
-        userName: 'Jane Smith',
-        userAvatar: '/images/avatars/user2.jpg',
-    },
-    {
-        id: '3',
-        imageUrl: '/images/sample/story3.jpg',
-        userName: 'Mike Johnson',
-        userAvatar: '/images/avatars/user3.jpg',
-    },
-    // Add more sample stories as needed
-];
 
 export default function StoriesContainer() {
     return (
