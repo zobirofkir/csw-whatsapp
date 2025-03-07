@@ -2,7 +2,6 @@ import DarkModeButton from './buttons/DarkModeButton';
 import MessageButton from './buttons/MessageButton';
 import MobileMenuButton from './buttons/MobileMenuButton';
 import NotificationButton from './buttons/NotificationButton';
-import ProfileButton from './buttons/ProfileButton';
 
 interface NavIconsProps {
     darkMode: boolean;
@@ -10,15 +9,34 @@ interface NavIconsProps {
     isMobile: boolean;
     showMobileMenu: boolean;
     setShowMobileMenu: (show: boolean) => void;
+    showProfileMenu: boolean;
+    setShowProfileMenu: (show: boolean) => void;
 }
 
-export default function NavIcons({ darkMode, toggleDarkMode, isMobile, showMobileMenu, setShowMobileMenu }: NavIconsProps) {
+export default function NavIcons({
+    darkMode,
+    toggleDarkMode,
+    isMobile,
+    showMobileMenu,
+    setShowMobileMenu,
+    showProfileMenu,
+    setShowProfileMenu,
+}: NavIconsProps) {
+    const handleProfileClick = () => {
+        setShowProfileMenu(!showProfileMenu);
+    };
+
     return (
         <div className="flex items-center space-x-2 md:space-x-4">
             <DarkModeButton darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
             <NotificationButton count={3} />
             <MessageButton count={5} />
-            <ProfileButton />
+            <button
+                onClick={handleProfileClick}
+                className="relative flex h-8 w-8 items-center justify-center rounded-full bg-gray-200 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            >
+                <img src="/path-to-profile-image.jpg" alt="Profile" className="h-8 w-8 rounded-full object-cover" />
+            </button>
             {isMobile && <MobileMenuButton showMobileMenu={showMobileMenu} setShowMobileMenu={setShowMobileMenu} />}
         </div>
     );
