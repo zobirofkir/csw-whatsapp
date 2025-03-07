@@ -31,12 +31,21 @@ export default function NavIcons({
             <DarkModeButton darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
             <NotificationButton count={3} />
             <MessageButton count={5} />
-            <button
-                onClick={handleProfileClick}
-                className="relative flex h-8 w-8 items-center justify-center rounded-full bg-gray-200 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-            >
-                <img src="https://images.pexels.com/photos/1704488/pexels-photo-1704488.jpeg?cs=srgb&dl=pexels-sulimansallehi-1704488.jpg&fm=jpg" alt="Profile" className="h-8 w-8 rounded-full object-cover" />
-            </button>
+            <div className="relative">
+                <button
+                    onClick={handleProfileClick}
+                    className="relative flex h-8 w-8 items-center justify-center rounded-full bg-gray-200 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                >
+                    <img
+                        src="https://images.pexels.com/photos/1704488/pexels-photo-1704488.jpeg?cs=srgb&dl=pexels-sulimansallehi-1704488.jpg&fm=jpg"
+                        alt="Profile"
+                        className="h-8 w-8 rounded-full object-cover"
+                    />
+                    <span
+                        className={`absolute -right-1 -bottom-1 h-3 w-3 rounded-full border-2 border-white ${showProfileMenu ? 'bg-blue-500' : 'bg-gray-400'}`}
+                    ></span>
+                </button>
+            </div>
             {isMobile && <MobileMenuButton showMobileMenu={showMobileMenu} setShowMobileMenu={setShowMobileMenu} />}
         </div>
     );
