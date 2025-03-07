@@ -54,7 +54,7 @@ export default function Welcome() {
 
                                 {auth.user ? (
                                     <Link
-                                        href={route('account')}
+                                        href={route('login')}
                                         className="inline-flex items-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
                                     >
                                         Account
@@ -105,7 +105,7 @@ export default function Welcome() {
                                 transition={{ delay: 0.4 }}
                                 className="mx-auto mt-8 max-w-md"
                             >
-                                <form className="flex md:flex-row flex-col gap-2" onSubmit={(e) => e.preventDefault()}>
+                                <form className="flex flex-col gap-2 md:flex-row" onSubmit={(e) => e.preventDefault()}>
                                     <input
                                         type="email"
                                         value={email}
