@@ -12,9 +12,9 @@ Route::middleware([
     'auth',
     ValidateSessionWithWorkOS::class,
 ])->group(function () {
-    Route::get('dashboard', function () {
-        return Inertia::render('dashboard');
-    })->name('dashboard');
+    Route::get('account', function () {
+        return Inertia::render('account');
+    })->name('account');
 });
 
 require __DIR__.'/settings.php';

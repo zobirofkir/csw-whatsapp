@@ -5,10 +5,10 @@ import { SAMPLE_POSTS } from '@/data/sample-posts';
 import AppLayout from '@/layouts/app-layout';
 import { Head } from '@inertiajs/react';
 
-export default function Dashboard() {
+export default function Account() {
     return (
         <AppLayout>
-            <Head title="News Feed" />
+            <Head title="Account" />
 
             <div className="space-y-4 py-4">
                 <StoriesContainer />
