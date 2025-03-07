@@ -1,4 +1,6 @@
 import { MediaItem, PageProps } from '@/types/post';
+import data from '@emoji-mart/data';
+import Picker from '@emoji-mart/react';
 import { usePage } from '@inertiajs/react';
 import axios from 'axios';
 import { useRef, useState } from 'react';
@@ -9,7 +11,6 @@ import { PostActionButton } from './PostActionButton';
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/jpg'];
 const ALLOWED_VIDEO_TYPES = ['video/mp4', 'video/quicktime', 'video/avi'];
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-const COMMON_EMOJIS = ['😀', '😊', '👍', '❤️', '😂', '🎉', '🔥', '👋', '😎', '🤔'];
 
 export default function CreatePostForm() {
     // State
@@ -18,7 +19,7 @@ export default function CreatePostForm() {
     const [feeling, setFeeling] = useState('');
     const [activity, setActivity] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    const [showEmojis, setShowEmojis] = useState(false);
+    const [showEmojiPicker, setShowEmojiPicker] = useState(false);
     const [uploadError, setUploadError] = useState<string | null>(null);
     const [isEditing, setIsEditing] = useState(false);
 
@@ -126,6 +127,12 @@ export default function CreatePostForm() {
         </div>
     );
 
+    // Add this handler for emoji selection
+    const handleEmojiSelect = (emoji: any) => {
+        setPostContent((prev) => prev + emoji.native);
+        setShowEmojiPicker(false);
+    };
+
     return (
         <div className="rounded-lg bg-white p-4 shadow dark:bg-gray-800">
             {renderProfileSection()}
@@ -158,7 +165,7 @@ export default function CreatePostForm() {
                         multiple
                     />
                     <PostActionButton icon="photo" text="Photo/Video" onClick={() => fileInputRef.current?.click()} />
-                    <PostActionButton icon="emoji" text="Feeling/Activity" onClick={() => setShowEmojis(!showEmojis)} />
+                    <PostActionButton icon="emoji" text="Feeling/Activity" onClick={() => setShowEmojiPicker(!showEmojiPicker)} />
                 </div>
             </div>
 
@@ -174,21 +181,26 @@ export default function CreatePostForm() {
                 </button>
             )}
 
-            {showEmojis && (
-                <div className="absolute z-10 mt-2 rounded-lg border bg-white p-2 shadow-lg dark:border-gray-700 dark:bg-gray-800">
-                    <div className="grid grid-cols-5 gap-2">
-                        {COMMON_EMOJIS.map((emoji) => (
-                            <button
-                                key={emoji}
-                                onClick={() => setPostContent((prev) => prev + emoji)}
-                                className="rounded p-1 text-2xl hover:bg-gray-100 dark:hover:bg-gray-700"
-                            >
-                                {emoji}
-                            </button>
-                        ))}
+            {showEmojiPicker && (
+                <div className="bg-opacity-50 fixed inset-0 z-50 flex items-center justify-center">
+                    <div className="relative rounded-lg bg-white p-4 dark:bg-gray-800">
+                        <button
+                            onClick={() => setShowEmojiPicker(false)}
+                            className="absolute top-2 right-2 z-10 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                        >
+                            <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                        <Picker
+                            data={data}
+                            onEmojiSelect={handleEmojiSelect}
+                            theme={document.documentElement.classList.contains('dark') ? 'dark' : 'light'}
+                        />
                     </div>
                 </div>
             )}
+
         </div>
     );
 }
