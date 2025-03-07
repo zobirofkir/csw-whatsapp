@@ -35,7 +35,7 @@ export default function NavIcons({
                 onClick={handleProfileClick}
                 className="relative flex h-8 w-8 items-center justify-center rounded-full bg-gray-200 focus:ring-2 focus:ring-blue-500 focus:outline-none"
             >
-                <img src="/path-to-profile-image.jpg" alt="Profile" className="h-8 w-8 rounded-full object-cover" />
+                <img src="https://images.pexels.com/photos/1704488/pexels-photo-1704488.jpeg?cs=srgb&dl=pexels-sulimansallehi-1704488.jpg&fm=jpg" alt="Profile" className="h-8 w-8 rounded-full object-cover" />
             </button>
             {isMobile && <MobileMenuButton showMobileMenu={showMobileMenu} setShowMobileMenu={setShowMobileMenu} />}
         </div>
