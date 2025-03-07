@@ -54,7 +54,7 @@ export default function Welcome() {
 
                                 {auth.user ? (
                                     <Link
-                                        href={route('login')}
+                                        href={`/account/auth/${auth.user.name}`}
                                         className="inline-flex items-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
                                     >
                                         Account
