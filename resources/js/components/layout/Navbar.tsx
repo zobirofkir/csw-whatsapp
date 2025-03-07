@@ -40,7 +40,7 @@ export default function Navbar({ darkMode, toggleDarkMode, isMobile, showMobileM
                     <div className="flex flex-1 items-center justify-start">
                         {/* Logo - Hidden when search is active on mobile */}
                         <div className={`flex-shrink-0 ${showSearch && isMobile ? 'hidden' : 'block'}`}>
-                            <Link href="/" className="text-xl sm:text-2xl font-bold text-blue-600 dark:text-blue-400">
+                            <Link href="/" className="text-xl sm:text-2xl font-bold text-blue-600 dark:text-blue-400 md:px-0 px-2">
                                 SocialApp
                             </Link>
                         </div>
