@@ -25,10 +25,10 @@ export default function Welcome() {
                             <div className="flex items-center space-x-4">
                                 {auth.user ? (
                                     <Link
-                                        href={route('dashboard')}
+                                        href={route('account')}
                                         className="inline-flex items-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
                                     >
-                                        Dashboard
+                                        Account
                                     </Link>
                                 ) : (
                                     <>
