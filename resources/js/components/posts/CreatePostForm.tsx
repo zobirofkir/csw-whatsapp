@@ -17,7 +17,7 @@ export default function CreatePostForm() {
             </div>
             <div className="mt-4 border-t pt-4">
                 <div className="flex items-center justify-between">
-                    <div className="flex space-x-4">
+                    <div className="flex md:flex-row flex-col gap-4 whitespace-nowrap">
                         <PostActionButton icon="photo" text="Photo/Video" color="green" />
                         <PostActionButton icon="emoji" text="Feeling/Activity" color="yellow" />
                     </div>
