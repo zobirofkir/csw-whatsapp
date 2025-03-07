@@ -50,15 +50,22 @@ export default function AppLayout({ children }: AppLayoutProps) {
                 setShowMobileMenu={setShowMobileMenu}
             />
 
-            <div className="pt-16">
-                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                    <div className="flex">
-                        <Sidebar isMobile={isMobile} showMobileMenu={showMobileMenu} />
-                        <div className="mx-auto w-full lg:w-3/4">{children}</div>
+            <main className="pt-16">
+                <div className="mx-auto grid grid-cols-1 gap-4 px-4 md:grid-cols-12 lg:px-8">
+                    {/* Left Sidebar */}
+                    <aside className="hidden md:col-span-3 md:block">
+                        <Sidebar isMobile={isMobile} showMobileMenu={showMobileMenu} setShowMobileMenu={setShowMobileMenu} />
+                    </aside>
+
+                    {/* Main Content */}
+                    <div className="md:col-span-6">{children}</div>
+
+                    {/* Right Sidebar */}
+                    <aside className="hidden md:col-span-3 md:block">
                         <RightSidebar />
-                    </div>
+                    </aside>
                 </div>
-            </div>
+            </main>
         </div>
     );
 }
