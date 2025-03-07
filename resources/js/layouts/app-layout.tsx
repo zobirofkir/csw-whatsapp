@@ -38,7 +38,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
     };
 
     return (
-        <div className="min-h-screen bg-gray-100 transition-colors duration-200 dark:bg-gray-900">
+        <div className="min-h-screen bg-neutral-100 transition-colors duration-200 dark:bg-neutral-900">
             <Navbar
                 darkMode={darkMode}
                 toggleDarkMode={toggleDarkMode}
@@ -51,7 +51,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                     <div className="flex">
                         <Sidebar isMobile={isMobile} showMobileMenu={showMobileMenu} />
-                        <div className="mx-auto w-full md:w-2/4">{children}</div>
+                        <div className="mx-auto w-full lg:w-3/4">{children}</div>
                         <RightSidebar />
                     </div>
                 </div>
