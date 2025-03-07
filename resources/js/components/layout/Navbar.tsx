@@ -1,5 +1,5 @@
-import { Link } from '@inertiajs/react';
-import { useState, useEffect } from 'react';
+import { Link, usePage } from '@inertiajs/react';
+import { useEffect, useState } from 'react';
 import { FaBookmark, FaCog, FaHeart, FaSignOutAlt, FaUser } from 'react-icons/fa';
 import NavIcons from './NavIcons';
 import DarkModeButton from './buttons/DarkModeButton';
@@ -13,6 +13,7 @@ interface NavbarProps {
 }
 
 export default function Navbar({ darkMode, toggleDarkMode, isMobile, showMobileMenu, setShowMobileMenu }: NavbarProps) {
+    const { auth } = usePage().props as any;
     const [showProfileMenu, setShowProfileMenu] = useState(false);
     const [showSearch, setShowSearch] = useState(false);
 
@@ -40,18 +41,23 @@ export default function Navbar({ darkMode, toggleDarkMode, isMobile, showMobileM
                     <div className="flex flex-1 items-center justify-start">
                         {/* Logo - Hidden when search is active on mobile */}
                         <div className={`flex-shrink-0 ${showSearch && isMobile ? 'hidden' : 'block'}`}>
-                            <Link href="/" className="text-xl sm:text-2xl font-bold text-blue-600 dark:text-blue-400 md:px-0 px-2">
+                            <Link
+                                href={auth?.user ? `/account/auth/${auth.user.name}` : '/'}
+                                className="px-2 text-xl font-bold text-blue-600 sm:text-2xl md:px-0 dark:text-blue-400"
+                            >
                                 SocialApp
                             </Link>
                         </div>
 
                         {/* Search Bar */}
-                        <div className={`mx-4 flex-1 transition-all duration-300 ease-in-out ${
-                            !showSearch && isMobile ? 'opacity-0 scale-95' : 'opacity-100 scale-100'
-                        }`}>
+                        <div
+                            className={`mx-4 flex-1 transition-all duration-300 ease-in-out ${
+                                !showSearch && isMobile ? 'scale-95 opacity-0' : 'scale-100 opacity-100'
+                            }`}
+                        >
                             <div className="relative">
                                 <svg
-                                    className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400"
+                                    className="absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 text-gray-400"
                                     fill="none"
                                     stroke="currentColor"
                                     viewBox="0 0 24 24"
@@ -66,15 +72,12 @@ export default function Navbar({ darkMode, toggleDarkMode, isMobile, showMobileM
                                 <input
                                     type="text"
                                     placeholder="Search..."
-                                    className="w-full rounded-full bg-gray-100 pl-10 pr-4 py-2 text-sm sm:text-base
-                                    focus:ring-2 focus:ring-blue-500 focus:outline-none
-                                    dark:bg-gray-700 dark:text-gray-200"
+                                    className="w-full rounded-full bg-gray-100 py-2 pr-4 pl-10 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none sm:text-base dark:bg-gray-700 dark:text-gray-200"
                                 />
                                 {isMobile && showSearch && (
                                     <button
                                         onClick={() => setShowSearch(false)}
-                                        className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500
-                                        transition-opacity duration-200 hover:text-gray-700"
+                                        className="absolute top-1/2 right-2 -translate-y-1/2 text-gray-500 transition-opacity duration-200 hover:text-gray-700"
                                     >
                                         Cancel
                                     </button>
@@ -85,20 +88,16 @@ export default function Navbar({ darkMode, toggleDarkMode, isMobile, showMobileM
 
                     {/* Mobile Search Toggle */}
                     {isMobile && !showSearch && (
-                        <button
-                            onClick={() => setShowSearch(true)}
-                            className="mx-2 p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400"
-                        >
+                        <button onClick={() => setShowSearch(true)} className="mx-2 p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400">
                             <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                             </svg>
                         </button>
                     )}
 
-                    <div className='md:hidden block'>
+                    <div className="block md:hidden">
                         <DarkModeButton darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
                     </div>
-
 
                     {/* Nav Icons */}
                     <div className="relative">
@@ -114,9 +113,7 @@ export default function Navbar({ darkMode, toggleDarkMode, isMobile, showMobileM
 
                         {/* Profile Dropdown Menu */}
                         {showProfileMenu && (
-                            <div className="profile-menu absolute right-0 mt-2 w-48 rounded-md bg-white py-1 shadow-lg
-                                ring-1 ring-black ring-opacity-5 dark:bg-gray-700
-                                transform origin-top-right transition-all duration-200 ease-out">
+                            <div className="profile-menu ring-opacity-5 absolute right-0 mt-2 w-48 origin-top-right transform rounded-md bg-white py-1 shadow-lg ring-1 ring-black transition-all duration-200 ease-out dark:bg-gray-700">
                                 <Link
                                     href="/settings/profile"
                                     className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-600"

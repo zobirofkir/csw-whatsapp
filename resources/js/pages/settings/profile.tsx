@@ -8,8 +8,8 @@ import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
+import ProfileLayout from '@/layouts/settings/profile-layout';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -40,87 +40,60 @@ export default function Profile() {
     };
 
     return (
-        <AppLayout breadcrumbs={breadcrumbs}>
+        <ProfileLayout breadcrumbs={breadcrumbs}>
             <Head title="Profile settings" />
 
             <SettingsLayout>
-                <div className="mx-auto max-w-[1012px]">
-                    <div className="rounded-lg bg-white shadow-sm dark:bg-[#242526]">
-                        {/* Header Section */}
-                        <div className="border-b border-[#E4E6EB] px-4 py-5 dark:border-[#3E4042]">
-                            <h1 className="text-[20px] font-semibold text-[#050505] dark:text-[#E4E6EB]">General Account Settings</h1>
-                        </div>
+                <div className="mx-auto max-w-3xl">
+                    <div className="space-y-6">
+                        {/* Profile Information Card */}
+                        <div className="rounded-xl bg-white shadow-sm dark:bg-gray-800">
+                            <div className="p-6">
+                                <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Profile Information</h2>
+                                <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                                    Update your account's profile information and email address.
+                                </p>
 
-                        {/* Main Content */}
-                        <form onSubmit={submit}>
-                            <div className="divide-y divide-[#E4E6EB] dark:divide-[#3E4042]">
-                                {/* Name Field */}
-                                <div className="px-4 py-4 transition duration-200 hover:bg-[#F2F2F2] dark:hover:bg-[#3A3B3C]">
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex-1">
-                                            <Label htmlFor="name" className="block text-[15px] font-medium text-[#050505] dark:text-[#E4E6EB]">
-                                                Name
-                                            </Label>
-                                            <div className="flex items-center gap-4">
-                                                <Input
-                                                    id="name"
-                                                    className="mt-1.5 h-9 w-full max-w-[320px] border-[#CED0D4] bg-[#F0F2F5] text-[15px] focus:border-[#1B74E4] focus:ring-[#1B74E4] dark:border-[#3E4042] dark:bg-[#3A3B3C] dark:focus:border-[#1B74E4] dark:focus:ring-[#1B74E4]"
-                                                    value={data.name}
-                                                    onChange={(e) => setData('name', e.target.value)}
-                                                    required
-                                                    autoComplete="name"
-                                                />
-                                                <Button
-                                                    type="button"
-                                                    variant="link"
-                                                    className="text-[15px] font-semibold text-[#1B74E4] hover:underline dark:text-[#4599FF]"
-                                                >
-                                                    Edit
-                                                </Button>
-                                            </div>
-                                            <InputError message={errors.name} className="mt-1" />
-                                        </div>
+                                <form onSubmit={submit} className="mt-6 space-y-6">
+                                    <div>
+                                        <Label htmlFor="name" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                            Name
+                                        </Label>
+                                        <Input
+                                            id="name"
+                                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+                                            value={data.name}
+                                            onChange={(e) => setData('name', e.target.value)}
+                                            required
+                                            autoComplete="name"
+                                        />
+                                        <InputError message={errors.name} className="mt-2" />
                                     </div>
-                                </div>
 
-                                {/* Email Field */}
-                                <div className="px-4 py-4 transition duration-200 hover:bg-[#F2F2F2] dark:hover:bg-[#3A3B3C]">
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex-1">
-                                            <Label htmlFor="email" className="block text-[15px] font-medium text-[#050505] dark:text-[#E4E6EB]">
-                                                Email
-                                            </Label>
-                                            <div className="flex items-center gap-4">
-                                                <Input
-                                                    id="email"
-                                                    type="email"
-                                                    className="mt-1.5 h-9 w-full max-w-[320px] cursor-not-allowed border-[#CED0D4] bg-[#F0F2F5] text-[15px] dark:border-[#3E4042] dark:bg-[#3A3B3C]"
-                                                    value={data.email}
-                                                    required
-                                                    autoComplete="username"
-                                                    disabled
-                                                />
-                                                <Button
-                                                    type="button"
-                                                    variant="link"
-                                                    className="text-[15px] font-semibold text-[#1B74E4] hover:underline dark:text-[#4599FF]"
-                                                >
-                                                    Edit
-                                                </Button>
-                                            </div>
-                                            <InputError message={errors.email} className="mt-1" />
+                                    <div>
+                                        <Label htmlFor="email" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                            Email
+                                        </Label>
+                                        <div className="mt-1 flex rounded-md shadow-sm">
+                                            <Input
+                                                id="email"
+                                                type="email"
+                                                className="block w-full rounded-md border-gray-300 bg-gray-50 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+                                                value={data.email}
+                                                onChange={(e) => setData('email', e.target.value)}
+                                                required
+                                                autoComplete="username"
+                                            />
                                         </div>
+                                        <InputError message={errors.email} className="mt-2" />
                                     </div>
-                                </div>
 
-                                {/* Save Button Section */}
-                                <div className="bg-[#F0F2F5] px-4 py-4 dark:bg-[#18191A]">
                                     <div className="flex items-center gap-4">
                                         <Button
                                             disabled={processing}
-                                            className="h-9 rounded-md bg-[#1B74E4] px-8 text-[15px] font-semibold hover:bg-[#1877F2] disabled:cursor-not-allowed disabled:opacity-50"
+                                            className="inline-flex items-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-xs font-semibold tracking-widest text-white uppercase transition duration-150 ease-in-out hover:bg-blue-700 focus:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none active:bg-blue-900 disabled:opacity-50"
                                         >
-                                            Save changes
+                                            Save Changes
                                         </Button>
 
                                         <Transition
@@ -130,20 +103,28 @@ export default function Profile() {
                                             leave="transition ease-in-out duration-300"
                                             leaveTo="opacity-0"
                                         >
-                                            <p className="text-[13px] font-medium text-[#00A400]">Changes saved successfully</p>
+                                            <p className="text-sm text-green-600 dark:text-green-400">Saved successfully.</p>
                                         </Transition>
                                     </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        {/* Delete Account Card */}
+                        <div className="rounded-xl bg-white shadow-sm dark:bg-gray-800">
+                            <div className="p-6">
+                                <h2 className="text-xl font-semibold text-red-600 dark:text-red-400">Delete Account</h2>
+                                <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                                    Once your account is deleted, all of its resources and data will be permanently deleted.
+                                </p>
+                                <div className="mt-6">
+                                    <DeleteUser />
                                 </div>
                             </div>
-                        </form>
-                    </div>
-
-                    {/* Delete Account Section */}
-                    <div className="mt-8 border-t border-[#CED0D4] pt-8 dark:border-[#3E4042]">
-                        <DeleteUser />
+                        </div>
                     </div>
                 </div>
             </SettingsLayout>
-        </AppLayout>
+        </ProfileLayout>
     );
 }
