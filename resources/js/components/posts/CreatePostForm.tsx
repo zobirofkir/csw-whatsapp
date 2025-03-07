@@ -1,3 +1,4 @@
+import { usePage } from '@inertiajs/react';
 import axios from 'axios';
 import { useRef, useState } from 'react';
 
@@ -107,12 +108,22 @@ export default function CreatePostForm() {
         setIsEditing(true);
     };
 
+    const { auth } = usePage().props as any;
+
     return (
         <div className="rounded-lg bg-white p-4 shadow dark:bg-gray-800">
             {/* Profile Section */}
             {!isEditing ? (
                 <div className="mb-3 flex items-center space-x-2">
-                    <img src="https://i.pravatar.cc/150?img=12" alt="Your avatar" className="h-10 w-10 rounded-full border border-gray-200" />
+                    <img
+                        src={auth?.user?.avatar?.startsWith('http')
+                            ? auth.user.avatar
+                            : auth.user.avatar
+                                ? `/storage/${auth.user.avatar}`
+                                : undefined}
+                        alt={auth?.user?.name}
+                        className="h-10 w-10 rounded-full border border-gray-200"
+                    />
                     <button
                         onClick={startEditing}
                         className="flex-grow rounded-full bg-gray-100 px-4 py-2.5 text-left text-gray-500 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600"
@@ -123,8 +134,14 @@ export default function CreatePostForm() {
             ) : (
                 <div className="mb-3">
                     <div className="mb-3 flex items-center space-x-2">
-                        <img src="https://i.pravatar.cc/150?img=12" alt="Your avatar" className="h-10 w-10 rounded-full border border-gray-200" />
-                        <div className="font-medium">Your Name</div>
+                        <img
+                            src={auth?.user?.avatar?.startsWith('http')
+                                ? auth.user.avatar
+                                : auth.user.avatar
+                                    ? `/storage/${auth.user.avatar}`
+                                    : undefined}
+                            alt={auth?.user?.name} className="h-10 w-10 rounded-full border border-gray-200" />
+                        <div className="font-medium">{auth.user.name}</div>
                     </div>
                     <textarea
                         className="w-full resize-none rounded-lg border-0 bg-transparent p-3 text-black focus:ring-0 dark:text-white"
