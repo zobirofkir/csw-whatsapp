@@ -5,17 +5,18 @@ import FriendsLink from './sidebar/FriendsLink';
 import GamingLink from './sidebar/GamingLink';
 import GroupsLink from './sidebar/GroupsLink';
 import MarketplaceLink from './sidebar/MarketplaceLink';
+import MessagesLink from './sidebar/MessagesLink';
+import NotificationsLink from './sidebar/NotificationsLink';
 import ProfileLink from './sidebar/ProfileLink';
 import WatchLink from './sidebar/WatchLink';
-import NotificationsLink from './sidebar/NotificationsLink';
-import MessagesLink from './sidebar/MessagesLink';
 
 interface SidebarProps {
     isMobile: boolean;
     showMobileMenu: boolean;
+    setShowMobileMenu: (show: boolean) => void;
 }
 
-export default function Sidebar({ isMobile, showMobileMenu }: SidebarProps) {
+export default function Sidebar({ isMobile, showMobileMenu, setShowMobileMenu }: SidebarProps) {
     return (
         <>
             {/* Overlay */}
@@ -30,8 +31,8 @@ export default function Sidebar({ isMobile, showMobileMenu }: SidebarProps) {
             <div
                 className={`fixed top-0 z-50 h-screen overflow-y-auto bg-white transition-all duration-300 ease-in-out dark:bg-gray-800 ${
                     isMobile
-                        ? `w-[280px] ${showMobileMenu ? 'translate-x-0 shadow-2xl' : '-translate-x-full'}`
-                        : 'left-0 w-1/4 translate-x-0 border-r border-gray-200 dark:border-gray-700'
+                        ? `w-[280px] lg:hidden ${showMobileMenu ? 'translate-x-0 shadow-2xl' : '-translate-x-full'}`
+                        : 'left-0 w-1/4 translate-x-0 border-r border-gray-200 lg:hidden dark:border-gray-700'
                 } pt-[72px] pb-20`}
             >
                 <div className="space-y-1 px-3">
