@@ -2,6 +2,7 @@ import { Link } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
 import { FaBookmark, FaCog, FaHeart, FaSignOutAlt, FaUser } from 'react-icons/fa';
 import NavIcons from './NavIcons';
+import DarkModeButton from './buttons/DarkModeButton';
 
 interface NavbarProps {
     darkMode: boolean;
@@ -77,6 +78,8 @@ export default function Navbar({ darkMode, toggleDarkMode, isMobile, showMobileM
                             </svg>
                         </button>
                     )}
+
+                    <DarkModeButton darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
 
                     {/* Nav Icons */}
                     <div className="relative">
