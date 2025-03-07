@@ -76,20 +76,20 @@ export default function Post({ post }: PostProps) {
 
     const handleReaction = async (type: string) => {
         try {
-            const prevReaction = userReaction;
-            const prevCounts = { ...reactionCounts };
+            const currentReaction = userReaction;
+            const currentCounts = { ...reactionCounts };
 
-            if (prevReaction === type) {
+            if (currentReaction === type) {
                 setUserReaction(undefined);
                 setReactionCounts((prev) => ({
                     ...prev,
                     [type]: Math.max((prev[type] || 0) - 1, 0),
                 }));
             } else {
-                if (prevReaction) {
+                if (currentReaction) {
                     setReactionCounts((prev) => ({
                         ...prev,
-                        [prevReaction]: Math.max((prev[prevReaction] || 0) - 1, 0),
+                        [currentReaction]: Math.max((prev[currentReaction] || 0) - 1, 0),
                     }));
                 }
                 setUserReaction(type);
@@ -106,8 +106,8 @@ export default function Post({ post }: PostProps) {
             setShowReactionPicker(false);
         } catch (error) {
             console.error('Error setting reaction:', error);
-            setReactionCounts(prevCounts);
-            setUserReaction(prevReaction);
+            setReactionCounts(currentCounts);
+            setUserReaction(currentReaction);
         }
     };
 
@@ -130,30 +130,30 @@ export default function Post({ post }: PostProps) {
     };
 
     return (
-        <div className="mb-3 rounded-lg bg-white shadow dark:bg-gray-800">
+        <div className="mb-4 overflow-hidden rounded-lg bg-white shadow-sm dark:bg-gray-800">
             <div className="p-4">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center">
                         <img src={post.user.avatar} alt={post.user.name} className="h-10 w-10 rounded-full" />
                         <div className="ml-2">
-                            <h3 className="text-[15px] font-semibold text-gray-900 hover:underline dark:text-white">{post.user.name}</h3>
-                            <div className="flex items-center text-[13px] text-gray-500 dark:text-gray-400">
+                            <h3 className="text-[15px] font-semibold text-[#050505] hover:underline dark:text-white">{post.user.name}</h3>
+                            <div className="flex items-center text-[13px] text-[#65676B] dark:text-gray-400">
                                 <span>{post.user.timestamp}</span>
                                 <span className="mx-1">·</span>
-                                <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 16 16">
+                                <svg className="h-3.5 w-3.5 fill-current" viewBox="0 0 16 16">
                                     <path d="M8 0a8 8 0 100 16A8 8 0 008 0zm0 14A6 6 0 118 2a6 6 0 010 12z" />
                                 </svg>
                             </div>
                         </div>
                     </div>
-                    <button className="rounded-full p-2 hover:bg-gray-100 dark:hover:bg-gray-700">
-                        <svg className="h-5 w-5 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
+                    <button className="rounded-full p-2 hover:bg-[#F0F2F5] dark:hover:bg-gray-700">
+                        <svg className="h-5 w-5 text-[#65676B]" viewBox="0 0 20 20" fill="currentColor">
                             <path d="M6 10a2 2 0 11-4 0 2 2 0 014 0zM12 10a2 2 0 11-4 0 2 2 0 014 0zM16 12a2 2 0 100-4 2 2 0 000 4z" />
                         </svg>
                     </button>
                 </div>
 
-                <p className="mt-3 text-[15px] whitespace-pre-wrap text-gray-900 dark:text-white">{post.content}</p>
+                <p className="mt-3 text-[15px] whitespace-pre-wrap text-[#050505] dark:text-white">{post.content}</p>
             </div>
 
             {post.media && post.media.length > 0 && (
@@ -181,47 +181,55 @@ export default function Post({ post }: PostProps) {
             )}
 
             <div className="px-4 py-1">
-                <div className="flex items-center justify-between border-b border-gray-100 pb-2 text-[15px] text-gray-500 dark:border-gray-700">
-                    <div className="flex items-center -space-x-1">
-                        {Object.entries(reactionCounts)
-                            .filter(([reaction, reactionCount]) => reactionCount > 0)
-                            .map(([type], index) => (
-                                <div
-                                    key={type}
-                                    className={`${index === 0 ? '' : '-ml-1'} h-5 w-5 rounded-full bg-white shadow-sm ring-2 ring-white dark:bg-gray-800`}
-                                >
-                                    {REACTIONS[type as keyof typeof REACTIONS]}
-                                </div>
-                            ))}
-                        <span className="ml-2">{Object.values(reactionCounts).reduce((a, b) => a + b, 0)}</span>
+                <div className="flex items-center justify-between border-b border-[#CED0D4] pb-2 text-[15px] text-[#65676B] dark:border-gray-700">
+                    <div className="flex items-center">
+                        <div className="flex -space-x-1">
+                            {Object.entries(reactionCounts)
+                                .filter(([_, count]) => count > 0)
+                                .map(([type], index) => (
+                                    <div
+                                        key={type}
+                                        className="flex h-[22px] w-[22px] transform items-center justify-center rounded-full bg-white shadow-[0_2px_4px_rgba(0,0,0,0.2)] ring-2 ring-white transition-transform hover:scale-110 dark:bg-gray-800"
+                                    >
+                                        {REACTIONS[type as keyof typeof REACTIONS]}
+                                    </div>
+                                ))}
+                        </div>
+                        <span className="ml-2 cursor-pointer text-[#65676B] hover:underline">
+                            {Object.values(reactionCounts).reduce((a, b) => a + b, 0)}
+                        </span>
                     </div>
-                    <span className="cursor-pointer hover:underline">{comments.length} comments</span>
+                    <span className="cursor-pointer text-[#65676B] hover:underline">{comments.length} comments</span>
                 </div>
             </div>
 
             <div className="px-4 py-1">
-                <div className="flex border-b border-gray-100 dark:border-gray-700">
-                    <div className="relative">
+                <div className="flex border-b border-[#CED0D4] dark:border-gray-700">
+                    <div className="relative flex-1">
                         <button
                             onClick={() => setShowReactionPicker(!showReactionPicker)}
-                            className={`flex flex-1 items-center justify-center space-x-2 rounded-lg py-2 hover:bg-gray-50 dark:hover:bg-gray-700 ${
-                                userReaction ? 'text-blue-500' : 'text-gray-500'
+                            onMouseEnter={() => setShowReactionPicker(true)}
+                            className={`group flex w-full items-center justify-center space-x-2 rounded-lg py-2 hover:bg-[#F0F2F5] dark:hover:bg-gray-700 ${
+                                userReaction ? 'text-[#1B74E4]' : 'text-[#65676B]'
                             }`}
                         >
-                            <span className="text-xl">{userReaction ? REACTIONS[userReaction as keyof typeof REACTIONS] : '👍'}</span>
+                            <span className="text-xl transition-transform group-hover:scale-125">
+                                {userReaction ? REACTIONS[userReaction as keyof typeof REACTIONS] : '👍'}
+                            </span>
                             <span className="font-semibold">Like</span>
                         </button>
 
                         {showReactionPicker && (
                             <div
                                 ref={reactionPickerRef}
-                                className="absolute bottom-full left-0 mb-2 flex space-x-1 rounded-full bg-white p-2 shadow-lg transition-all duration-200 dark:bg-gray-700"
+                                onMouseLeave={() => setShowReactionPicker(false)}
+                                className="absolute bottom-full left-0 mb-2 flex space-x-1 rounded-full bg-white p-1 shadow-[0_0_8px_rgba(0,0,0,0.2)] transition-all duration-200 dark:bg-gray-700"
                             >
                                 {Object.entries(REACTIONS).map(([type, emoji]) => (
                                     <button
                                         key={type}
                                         onClick={() => handleReaction(type)}
-                                        className={`transform cursor-pointer rounded-full p-2 text-2xl transition hover:scale-125 ${
+                                        className={`transform cursor-pointer rounded-full p-2 text-3xl transition hover:scale-125 ${
                                             userReaction === type ? 'scale-110' : ''
                                         }`}
                                         title={type}
