@@ -75,7 +75,7 @@ export default function Sidebar({ isMobile, showMobileMenu, setShowMobileMenu }:
                         <SidebarLink href="/messages">
                             <MessagesLink count={5} />
                         </SidebarLink>
-                        <SidebarLink href="/logout">
+                        <SidebarLink href="/logout" method="post" as="button">
                             <div className='flex items-center gap-2'>
                                 <FaSignOutAlt />
                                 <span>Logout</span>
@@ -115,10 +115,11 @@ export default function Sidebar({ isMobile, showMobileMenu, setShowMobileMenu }:
     );
 }
 
-function SidebarLink({ href, children }: { href: string; children: ReactNode }) {
+function SidebarLink({ href, children, method, as }: { href: string; children: ReactNode; method?: string; as?: string }) {
     return (
         <Link
             href={href}
+            method={method}
             className="flex items-center space-x-3 rounded-lg p-3 font-medium text-gray-700 transition-colors hover:bg-gray-100 active:bg-gray-200 dark:text-gray-200 dark:hover:bg-gray-700/50 dark:active:bg-gray-700"
         >
             <span>{children}</span>
