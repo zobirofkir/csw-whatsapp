@@ -29,7 +29,7 @@ export default function Sidebar({ isMobile, showMobileMenu }: SidebarProps) {
 
 function SidebarLink({ href, children }: { href: string; children: ReactNode }) {
     return (
-        <Link href={href} className="flex items-center space-x-2 rounded-lg p-2 font-medium text-gray-700 hover:bg-gray-200">
+        <Link href={href} className="flex items-center space-x-2 rounded-lg p-2 font-medium dark:text-white text-gray-700">
             <span>{children}</span>
         </Link>
     );
