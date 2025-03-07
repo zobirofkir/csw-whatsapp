@@ -12,17 +12,20 @@ export default function ContactsList() {
     ];
 
     return (
-        <div className="space-y-4">
+        <div className="space-y-1">
             {contacts.map((contact) => (
-                <div key={contact.name} className="flex items-center space-x-3">
-                    <div className="relative">
-                        <img src={contact.img} alt={contact.name} className="h-8 w-8 rounded-full" />
-                        <span
-                            className={`absolute right-0 bottom-0 h-3 w-3 rounded-full border-2 border-white ${contact.status === 'online' ? 'bg-green-500' : 'bg-gray-400'}`}
-                        />
+                <button
+                    key={contact.name}
+                    className="flex w-full items-center gap-3 rounded-lg px-2 py-2 hover:bg-gray-100 dark:hover:bg-gray-700/50"
+                >
+                    <div className="relative flex-shrink-0">
+                        <img src={contact.img} alt={contact.name} className="h-9 w-9 rounded-full object-cover" />
+                        {contact.status === 'online' && (
+                            <span className="absolute right-0 bottom-0 h-3 w-3 rounded-full border-2 border-white bg-green-500 dark:border-gray-800" />
+                        )}
                     </div>
-                    <span className="dark:text-gray-200">{contact.name}</span>
-                </div>
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-200">{contact.name}</span>
+                </button>
             ))}
         </div>
     );
