@@ -1,3 +1,4 @@
+import { usePage } from '@inertiajs/react';
 import DarkModeButton from './buttons/DarkModeButton';
 import MessageButton from './buttons/MessageButton';
 import MobileMenuButton from './buttons/MobileMenuButton';
@@ -34,6 +35,8 @@ export default function NavIcons({
         setShowMobileMenu(!showMobileMenu);
     };
 
+    const { auth } = usePage().props as any;
+
     return (
         <div className="flex items-center">
             <div className="flex items-center space-x-1 sm:space-x-2 md:space-x-4">
@@ -50,8 +53,8 @@ export default function NavIcons({
                         className="relative flex h-8 w-8 items-center justify-center rounded-full bg-gray-200 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                     >
                         <img
-                            src="https://images.pexels.com/photos/1704488/pexels-photo-1704488.jpeg?cs=srgb&dl=pexels-sulimansallehi-1704488.jpg&fm=jpg"
-                            alt="Profile"
+                            src={auth?.user?.avatar}
+                            alt={auth?.user?.name}
                             className="h-8 w-8 rounded-full object-cover"
                         />
                         <span
