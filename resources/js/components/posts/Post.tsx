@@ -104,29 +104,38 @@ export default function Post({ post }: PostProps) {
     };
 
     return (
-        <div className="mb-3 rounded-lg bg-white shadow-sm dark:bg-gray-800">
+        <div className="mb-3 rounded-lg bg-white shadow dark:bg-gray-800">
             <div className="p-4">
                 <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                        <img src={post.user.avatar} alt={post.user.name} className="h-10 w-10 rounded-full border border-gray-200" />
-                        <div>
-                            <h3 className="text-[15px] font-semibold text-gray-900 hover:underline dark:text-white">{post.user.name}</h3>
+                    <div className="flex items-center">
+                        <img
+                            src={post.user.avatar}
+                            alt={post.user.name}
+                            className="h-10 w-10 rounded-full"
+                        />
+                        <div className="ml-2">
+                            <h3 className="text-[15px] font-semibold text-gray-900 hover:underline dark:text-white">
+                                {post.user.name}
+                            </h3>
                             <div className="flex items-center text-[13px] text-gray-500 dark:text-gray-400">
                                 <span>{post.user.timestamp}</span>
                                 <span className="mx-1">·</span>
                                 <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 16 16">
-                                    <path d="M12 8a4 4 0 11-8 0 4 4 0 018 0zM8 0a8 8 0 100 16A8 8 0 008 0z" />
+                                    <path d="M8 0a8 8 0 100 16A8 8 0 008 0zm0 14A6 6 0 118 2a6 6 0 010 12z"/>
                                 </svg>
                             </div>
                         </div>
                     </div>
                     <button className="rounded-full p-2 hover:bg-gray-100 dark:hover:bg-gray-700">
-                        <svg className="h-6 w-6 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
+                        <svg className="h-5 w-5 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M6 10a2 2 0 11-4 0 2 2 0 014 0zM12 10a2 2 0 11-4 0 2 2 0 014 0zM16 12a2 2 0 100-4 2 2 0 000 4z" />
                         </svg>
                     </button>
                 </div>
-                <p className="mt-4 text-[15px] text-gray-900 dark:text-white">{post.content}</p>
+
+                <p className="mt-3 text-[15px] text-gray-900 dark:text-white whitespace-pre-wrap">
+                    {post.content}
+                </p>
             </div>
 
             {post.media && post.media.length > 0 && (
@@ -153,93 +162,119 @@ export default function Post({ post }: PostProps) {
                 </div>
             )}
 
-            <div className="px-4">
-                <div className="flex items-center justify-between border-b border-gray-100 py-2.5 text-[15px] text-gray-500 dark:border-gray-700">
-                    <div className="flex items-center space-x-2">
-                        <div className="relative">
-                            <span
-                                className="flex items-center cursor-pointer"
-                                onClick={() => setShowReactionPicker(!showReactionPicker)}
-                            >
-                                {Object.entries(reactionCounts)
-                                    .filter(([_, count]) => count > 0)
-                                    .map(([type, count]) => (
-                                        <span key={type} className="mr-1" title={`${count} ${type}`}>
-                                            {REACTIONS[type as keyof typeof REACTIONS]}
-                                        </span>
-                                    ))}
-                                <span className="ml-1">{Object.values(reactionCounts).reduce((a, b) => a + b, 0)}</span>
-                            </span>
-
-                            {showReactionPicker && (
+            <div className="px-4 py-1">
+                <div className="flex items-center justify-between border-b border-gray-100 pb-2 text-[15px] text-gray-500 dark:border-gray-700">
+                    <div className="flex items-center -space-x-1">
+                        {Object.entries(reactionCounts)
+                            .filter(([_, count]) => count > 0)
+                            .map(([type, count], index) => (
                                 <div
-                                    ref={reactionPickerRef}
-                                    className="absolute bottom-full left-0 mb-2 flex space-x-2 rounded-full bg-white p-2 shadow-lg dark:bg-gray-700"
+                                    key={type}
+                                    className={`${index === 0 ? '' : '-ml-1'} h-5 w-5 rounded-full bg-white shadow-sm ring-2 ring-white dark:bg-gray-800`}
                                 >
-                                    {Object.entries(REACTIONS).map(([type, emoji]) => (
-                                        <button
-                                            key={type}
-                                            onClick={() => handleReaction(type)}
-                                            className={`transform cursor-pointer rounded-full p-2 transition hover:scale-125 ${
-                                                userReaction === type ? 'bg-gray-100 dark:bg-gray-600' : ''
-                                            }`}
-                                            title={type}
-                                        >
-                                            {emoji}
-                                        </button>
-                                    ))}
+                                    {REACTIONS[type as keyof typeof REACTIONS]}
                                 </div>
-                            )}
-                        </div>
+                            ))}
+                        <span className="ml-2">
+                            {Object.values(reactionCounts).reduce((a, b) => a + b, 0)}
+                        </span>
                     </div>
-                    <span
-                        onClick={() => setShowComments(!showComments)}
-                        className="cursor-pointer text-gray-500 hover:underline dark:text-gray-400"
-                    >
+                    <span className="cursor-pointer hover:underline">
                         {comments.length} comments
                     </span>
                 </div>
+            </div>
 
-                <PostActions
-                    onLike={() => setShowReactionPicker(!showReactionPicker)}
-                    hasReacted={!!userReaction}
-                    onCommentClick={() => setShowComments(!showComments)}
-                    activeReaction={userReaction}
-                />
+            <div className="px-4 py-1">
+                <div className="flex border-b border-gray-100 dark:border-gray-700">
+                    <button
+                        onClick={() => setShowReactionPicker(!showReactionPicker)}
+                        className={`relative flex flex-1 items-center justify-center space-x-2 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg ${
+                            userReaction ? 'text-blue-500' : 'text-gray-500'
+                        }`}
+                    >
+                        <span className="text-xl">{userReaction ? REACTIONS[userReaction as keyof typeof REACTIONS] : '👍'}</span>
+                        <span className="font-semibold">Like</span>
+                    </button>
+                    <button
+                        onClick={() => setShowComments(!showComments)}
+                        className="flex flex-1 items-center justify-center space-x-2 py-2 text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg"
+                    >
+                        <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
+                        </svg>
+                        <span className="font-semibold">Comment</span>
+                    </button>
+                    <button className="flex flex-1 items-center justify-center space-x-2 py-2 text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg">
+                        <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92c0-1.61-1.31-2.92-2.92-2.92zM18 4c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zM6 13c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm12 7.02c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1z"/>
+                        </svg>
+                        <span className="font-semibold">Share</span>
+                    </button>
+                </div>
+            </div>
 
-                {showComments && (
-                    <div className="mt-4">
-                        <form onSubmit={handleComment} className="mb-4">
-                            <input
-                                type="text"
-                                value={newComment}
-                                onChange={(e) => setNewComment(e.target.value)}
-                                placeholder="Write a comment..."
-                                className="w-full rounded-lg border border-gray-200 p-2 dark:border-gray-700 dark:bg-gray-800"
-                            />
-                        </form>
+            {showComments && (
+                <div className="px-4 py-2">
+                    <form onSubmit={handleComment} className="mb-4 flex items-center space-x-2">
+                        <img
+                            src={post.user.avatar}
+                            alt="Your avatar"
+                            className="h-8 w-8 rounded-full"
+                        />
+                        <input
+                            type="text"
+                            value={newComment}
+                            onChange={(e) => setNewComment(e.target.value)}
+                            placeholder="Write a comment..."
+                            className="flex-1 rounded-full bg-gray-100 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700"
+                        />
+                    </form>
 
-                        <div className="space-y-4">
-                            {comments.map((comment) => (
-                                <div key={comment.id} className="flex space-x-2">
-                                    <img
-                                        src={comment.user.avatar}
-                                        alt={comment.user.name}
-                                        className="h-8 w-8 rounded-full"
-                                    />
-                                    <div className="flex-1">
-                                        <div className="rounded-lg bg-gray-100 p-2 dark:bg-gray-700">
-                                            <p className="font-semibold">{comment.user.name}</p>
-                                            <p>{comment.content}</p>
-                                        </div>
-                                        <span className="text-xs text-gray-500">{comment.timestamp}</span>
+                    <div className="space-y-3">
+                        {comments.map((comment) => (
+                            <div key={comment.id} className="flex space-x-2">
+                                <img
+                                    src={comment.user.avatar}
+                                    alt={comment.user.name}
+                                    className="h-8 w-8 rounded-full"
+                                />
+                                <div>
+                                    <div className="rounded-2xl bg-gray-100 px-3 py-2 dark:bg-gray-700">
+                                        <p className="text-sm font-semibold">{comment.user.name}</p>
+                                        <p className="text-sm">{comment.content}</p>
+                                    </div>
+                                    <div className="mt-1 flex space-x-3 text-xs text-gray-500">
+                                        <button className="font-semibold hover:underline">Like</button>
+                                        <button className="font-semibold hover:underline">Reply</button>
+                                        <span>{comment.timestamp}</span>
                                     </div>
                                 </div>
-                            ))}
-                        </div>
+                            </div>
+                        ))}
                     </div>
-                )}
-            </div>
+                </div>
+            )}
+
+            {showReactionPicker && (
+                <div
+                    ref={reactionPickerRef}
+                    className="absolute -top-12 left-0 flex space-x-1 rounded-full bg-white p-2 shadow-lg transition-all duration-200 dark:bg-gray-700"
+                >
+                    {Object.entries(REACTIONS).map(([type, emoji]) => (
+                        <button
+                            key={type}
+                            onClick={() => handleReaction(type)}
+                            className={`transform cursor-pointer rounded-full p-2 text-2xl transition hover:scale-125 ${
+                                userReaction === type ? 'scale-110' : ''
+                            }`}
+                            title={type}
+                        >
+                            {emoji}
+                        </button>
+                    ))}
+                </div>
+            )}
         </div>
     );
 }
@@ -266,45 +301,4 @@ function getMediaAspectClass(totalMedia: number, index: number): string {
     if (totalMedia === 3) return 'aspect-square';
     if (totalMedia === 4) return 'aspect-square';
     return 'aspect-square';
-}
-
-function PostActions({ onLike, hasReacted, onCommentClick, activeReaction }: {
-    onLike: () => void,
-    hasReacted: boolean,
-    onCommentClick: () => void,
-    activeReaction?: string
-}) {
-    const getReactionEmoji = () => {
-        if (!activeReaction) return '👍';
-        return REACTIONS[activeReaction as keyof typeof REACTIONS] || '👍';
-    };
-
-    return (
-        <div className="flex justify-between py-1">
-            <button
-                onClick={onLike}
-                className={`flex flex-1 items-center justify-center space-x-2 rounded-lg py-2 text-[15px] font-medium ${
-                    hasReacted ? 'text-blue-500' : 'text-gray-500'
-                } hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700`}
-            >
-                <span className="text-xl">{getReactionEmoji()}</span>
-                <span>React</span>
-            </button>
-            <ActionButton icon="comment" text="Comment" onClick={onCommentClick} />
-            <ActionButton icon="share" text="Share" onClick={() => {}} />
-        </div>
-    );
-}
-
-function ActionButton({ icon, text, onClick }: { icon: string; text: string; onClick: () => void }) {
-    const className = `flex flex-1 items-center justify-center space-x-2 rounded-lg py-2 text-[15px] font-medium text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700`;
-
-    return (
-        <button className={className} onClick={onClick}>
-            <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M1.5 12.5h3a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-7a.5.5 0 0 1 .5-.5zm9.147-5.992c1.381-.239 2.345.154 2.871 1.178.526 1.024.526 2.287 0 3.793l-.25.61h4.365c1.035 0 1.905.74 1.949 1.715l.006.14v.608a3.314 3.314 0 0 1-.46 1.698l-2.052 3.774a1.59 1.59 0 0 1-1.352.828h-7.111a.505.505 0 0 1-.501-.505V9.556c0-.272.199-.49.454-.505z" />
-            </svg>
-            <span>{text}</span>
-        </button>
-    );
 }
