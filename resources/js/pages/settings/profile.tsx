@@ -45,59 +45,70 @@ export default function Profile({ status }: { status?: string }) {
             <Head title="Profile settings" />
 
             <SettingsLayout>
-                <div className="space-y-6">
+                <div className="space-y-8">
                     <HeadingSmall title="Profile information" description="Update your name and email address" />
 
-                    <form onSubmit={submit} className="space-y-6">
-                        <div className="grid gap-2">
-                            <Label htmlFor="name">Name</Label>
+                    <form onSubmit={submit} className="space-y-8">
+                        <div className="grid gap-6 p-6 bg-white rounded-lg shadow-sm border border-neutral-200 dark:bg-neutral-900 dark:border-neutral-800">
+                            <div className="grid gap-2">
+                                <Label htmlFor="name" className="text-sm font-medium">
+                                    Name
+                                </Label>
+                                <Input
+                                    id="name"
+                                    className="w-full transition-colors"
+                                    value={data.name}
+                                    onChange={(e) => setData('name', e.target.value)}
+                                    required
+                                    autoComplete="name"
+                                    placeholder="Full name"
+                                />
+                                <InputError message={errors.name} />
+                            </div>
 
-                            <Input
-                                id="name"
-                                className="mt-1 block w-full"
-                                value={data.name}
-                                onChange={(e) => setData('name', e.target.value)}
-                                required
-                                autoComplete="name"
-                                placeholder="Full name"
-                            />
+                            <div className="grid gap-2">
+                                <Label htmlFor="email" className="text-sm font-medium">
+                                    Email address
+                                </Label>
+                                <Input
+                                    id="email"
+                                    type="email"
+                                    className="w-full bg-neutral-50 dark:bg-neutral-800"
+                                    value={data.email}
+                                    required
+                                    autoComplete="username"
+                                    disabled
+                                />
+                                <InputError message={errors.email} />
+                            </div>
 
-                            <InputError className="mt-2" message={errors.name} />
-                        </div>
+                            <div className="flex items-center gap-4 pt-2">
+                                <Button
+                                    disabled={processing}
+                                    className="px-6 transition-all hover:shadow-md"
+                                >
+                                    Save changes
+                                </Button>
 
-                        <div className="grid gap-2">
-                            <Label htmlFor="email">Email address</Label>
-
-                            <Input
-                                id="email"
-                                type="email"
-                                className="mt-1 block w-full"
-                                value={data.email}
-                                required
-                                autoComplete="username"
-                                disabled
-                            />
-
-                            <InputError className="mt-2" message={errors.email} />
-                        </div>
-
-                        <div className="flex items-center gap-4">
-                            <Button disabled={processing}>Save</Button>
-
-                            <Transition
-                                show={recentlySuccessful}
-                                enter="transition ease-in-out"
-                                enterFrom="opacity-0"
-                                leave="transition ease-in-out"
-                                leaveTo="opacity-0"
-                            >
-                                <p className="text-sm text-neutral-600">Saved</p>
-                            </Transition>
+                                <Transition
+                                    show={recentlySuccessful}
+                                    enter="transition ease-in-out duration-300"
+                                    enterFrom="opacity-0"
+                                    leave="transition ease-in-out duration-300"
+                                    leaveTo="opacity-0"
+                                >
+                                    <p className="text-sm text-emerald-600 dark:text-emerald-400">
+                                        Changes saved successfully
+                                    </p>
+                                </Transition>
+                            </div>
                         </div>
                     </form>
-                </div>
 
-                <DeleteUser />
+                    <div className="border-t border-neutral-200 dark:border-neutral-800 pt-8">
+                        <DeleteUser />
+                    </div>
+                </div>
             </SettingsLayout>
         </AppLayout>
     );
