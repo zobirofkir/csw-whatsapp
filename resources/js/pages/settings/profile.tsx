@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import SettingsLayout from '@/layouts/settings/layout';
 import ProfileLayout from '@/layouts/settings/profile-layout';
+import CreatePostForm from '@/components/posts/CreatePostForm';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -64,6 +65,9 @@ export default function Profile() {
             <SettingsLayout>
                 <div className="mx-auto max-w-3xl">
                     <div className="space-y-6">
+                        {/* Add CreatePostForm at the top */}
+                        <CreatePostForm />
+
                         {/* Profile Information Card */}
                         <div className="rounded-xl bg-white shadow-sm dark:bg-gray-800">
                             <div className="p-6">

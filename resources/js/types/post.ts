@@ -1,3 +1,5 @@
+import { PageProps as InertiaPageProps } from '@inertiajs/core';
+
 export interface MediaItem {
     file: File;
     preview: string;
@@ -10,8 +12,14 @@ export interface User {
     avatar: string;
 }
 
-export interface PageProps {
+export interface PageProps extends InertiaPageProps {
     auth: {
-        user: User;
+        user: {
+            id: number;
+            name: string;
+            email: string;
+            avatar: string;
+        };
     };
+    [key: string]: any;
 }
