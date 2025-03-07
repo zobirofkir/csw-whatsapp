@@ -46,7 +46,9 @@ export default function Navbar({ darkMode, toggleDarkMode, isMobile, showMobileM
                         </div>
 
                         {/* Search Bar */}
-                        <div className={`mx-4 flex-1 ${!showSearch && isMobile ? 'hidden' : 'block'}`}>
+                        <div className={`mx-4 flex-1 transition-all duration-300 ease-in-out ${
+                            !showSearch && isMobile ? 'opacity-0 scale-95' : 'opacity-100 scale-100'
+                        }`}>
                             <div className="relative">
                                 <input
                                     type="text"
@@ -58,7 +60,8 @@ export default function Navbar({ darkMode, toggleDarkMode, isMobile, showMobileM
                                 {isMobile && showSearch && (
                                     <button
                                         onClick={() => setShowSearch(false)}
-                                        className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500"
+                                        className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500
+                                        transition-opacity duration-200 hover:text-gray-700"
                                     >
                                         Cancel
                                     </button>
