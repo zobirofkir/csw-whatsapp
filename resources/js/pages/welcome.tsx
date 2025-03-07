@@ -16,9 +16,9 @@ export default function Welcome() {
                 <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
             </Head>
 
-            <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white dark:from-gray-900 dark:to-gray-800">
+            <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white transition-colors duration-300 dark:from-gray-900 dark:to-gray-800">
                 {/* Navigation */}
-                <nav className="fixed z-50 w-full bg-white/80 shadow-sm backdrop-blur-md dark:bg-gray-900/80">
+                <nav className="fixed z-50 w-full bg-white/80 shadow-sm backdrop-blur-md transition-colors duration-300 dark:bg-gray-900/80">
                     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                         <div className="flex h-16 justify-between">
                             <div className="flex items-center">
@@ -262,46 +262,12 @@ export default function Welcome() {
                     </div>
                 </div>
 
-                {/* New Download Section */}
-                <motion.section
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.8 }}
-                    className="bg-gray-50 py-24 dark:bg-gray-800"
-                >
-                    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                        <div className="text-center">
-                            <h2 className="mb-8 text-3xl font-bold text-gray-900 dark:text-white">Download Our App</h2>
-                            <div className="flex flex-col justify-center gap-4 sm:flex-row">
-                                <a
-                                    href="#"
-                                    className="inline-flex items-center justify-center rounded-lg border border-transparent bg-blue-600 px-6 py-3 text-base font-medium text-white hover:bg-blue-700"
-                                >
-                                    <svg className="mr-2 h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
-                                        <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.53 4.08zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.27 2.33-2.02 4.13-3.74 4.25z" />
-                                    </svg>
-                                    App Store
-                                </a>
-                                <a
-                                    href="#"
-                                    className="inline-flex items-center justify-center rounded-lg border border-transparent bg-blue-600 px-6 py-3 text-base font-medium text-white hover:bg-blue-700"
-                                >
-                                    <svg className="mr-2 h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
-                                        <path d="M3.5 3.5v17a1 1 0 001 1h15a1 1 0 001-1v-17a1 1 0 00-1-1h-15a1 1 0 00-1 1zm16 0L12 12 3.5 3.5m0 17L12 12l7.5 8.5" />
-                                    </svg>
-                                    Play Store
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </motion.section>
-
-                {/* New Newsletter Section */}
+                {/* Newsletter section - update the classes to add transitions */}
                 <motion.section
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 1 }}
-                    className="bg-white py-24 dark:bg-gray-900"
+                    className="bg-white py-24 transition-colors duration-300 dark:bg-gray-900"
                 >
                     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                         <div className="text-center">
@@ -319,8 +285,8 @@ export default function Welcome() {
                     </div>
                 </motion.section>
 
-                {/* Footer */}
-                <footer className="mt-24 bg-white/80 py-12 dark:bg-gray-900/80">
+                {/* Footer - update the classes to add transitions */}
+                <footer className="mt-24 bg-white/80 py-12 transition-colors duration-300 dark:bg-gray-900/80">
                     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                         <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
                             <div>
