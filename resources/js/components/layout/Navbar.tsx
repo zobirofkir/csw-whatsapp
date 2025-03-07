@@ -50,10 +50,23 @@ export default function Navbar({ darkMode, toggleDarkMode, isMobile, showMobileM
                             !showSearch && isMobile ? 'opacity-0 scale-95' : 'opacity-100 scale-100'
                         }`}>
                             <div className="relative">
+                                <svg
+                                    className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                                    />
+                                </svg>
                                 <input
                                     type="text"
                                     placeholder="Search..."
-                                    className="w-full rounded-full bg-gray-100 px-4 py-2 text-sm sm:text-base
+                                    className="w-full rounded-full bg-gray-100 pl-10 pr-4 py-2 text-sm sm:text-base
                                     focus:ring-2 focus:ring-blue-500 focus:outline-none
                                     dark:bg-gray-700 dark:text-gray-200"
                                 />
