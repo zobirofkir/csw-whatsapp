@@ -105,7 +105,7 @@ export default function Welcome() {
                                 transition={{ delay: 0.4 }}
                                 className="mx-auto mt-8 max-w-md"
                             >
-                                <form className="flex gap-2" onSubmit={(e) => e.preventDefault()}>
+                                <form className="flex md:flex-row flex-col gap-2" onSubmit={(e) => e.preventDefault()}>
                                     <input
                                         type="email"
                                         value={email}
