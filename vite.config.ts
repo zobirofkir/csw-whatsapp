@@ -14,28 +14,12 @@ export default defineConfig({
         react(),
         tailwindcss(),
     ],
-    build: {
-        chunkSizeWarningLimit: 1000,
-        rollupOptions: {
-            output: {
-                manualChunks: {
-                    vendor: ['react', 'react-dom', 'framer-motion', '@inertiajs/react'],
-                    components: [
-                        './resources/js/components/layout/Navbar.tsx',
-                        './resources/js/components/layout/Sidebar.tsx',
-                        './resources/js/components/layout/RightSidebar.tsx',
-                    ],
-                },
-            },
-        },
-    },
     esbuild: {
         jsx: 'automatic',
     },
     resolve: {
         alias: {
             'ziggy-js': resolve(__dirname, 'vendor/tightenco/ziggy'),
-            '@': '/resources/js',
         },
     },
 });
