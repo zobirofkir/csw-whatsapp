@@ -1,3 +1,4 @@
+import { useTheme } from '@/hooks/useTheme';
 import { type SharedData } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
 import { motion } from 'framer-motion';
@@ -6,6 +7,7 @@ import { useState } from 'react';
 export default function Welcome() {
     const { auth } = usePage<SharedData>().props;
     const [email, setEmail] = useState('');
+    const { theme, toggleTheme } = useTheme();
 
     return (
         <>
@@ -20,9 +22,36 @@ export default function Welcome() {
                     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                         <div className="flex h-16 justify-between">
                             <div className="flex items-center">
-                                <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">SocialConnect</span>
+                                <span className="text-xl font-bold text-blue-600 sm:text-2xl dark:text-blue-400">SocialConnect</span>
                             </div>
-                            <div className="flex items-center space-x-4">
+                            <div className="flex items-center space-x-2 sm:space-x-4">
+                                {/* Theme Switcher */}
+                                <button
+                                    onClick={toggleTheme}
+                                    className="p-2 text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
+                                    aria-label="Toggle theme"
+                                >
+                                    {theme === 'dark' ? (
+                                        <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth="2"
+                                                d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
+                                            />
+                                        </svg>
+                                    ) : (
+                                        <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth="2"
+                                                d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
+                                            />
+                                        </svg>
+                                    )}
+                                </button>
+
                                 {auth.user ? (
                                     <Link
                                         href={route('account')}
@@ -232,6 +261,63 @@ export default function Welcome() {
                         </motion.div>
                     </div>
                 </div>
+
+                {/* New Download Section */}
+                <motion.section
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.8 }}
+                    className="bg-gray-50 py-24 dark:bg-gray-800"
+                >
+                    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                        <div className="text-center">
+                            <h2 className="mb-8 text-3xl font-bold text-gray-900 dark:text-white">Download Our App</h2>
+                            <div className="flex flex-col justify-center gap-4 sm:flex-row">
+                                <a
+                                    href="#"
+                                    className="inline-flex items-center justify-center rounded-lg border border-transparent bg-blue-600 px-6 py-3 text-base font-medium text-white hover:bg-blue-700"
+                                >
+                                    <svg className="mr-2 h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.53 4.08zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.27 2.33-2.02 4.13-3.74 4.25z" />
+                                    </svg>
+                                    App Store
+                                </a>
+                                <a
+                                    href="#"
+                                    className="inline-flex items-center justify-center rounded-lg border border-transparent bg-blue-600 px-6 py-3 text-base font-medium text-white hover:bg-blue-700"
+                                >
+                                    <svg className="mr-2 h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M3.5 3.5v17a1 1 0 001 1h15a1 1 0 001-1v-17a1 1 0 00-1-1h-15a1 1 0 00-1 1zm16 0L12 12 3.5 3.5m0 17L12 12l7.5 8.5" />
+                                    </svg>
+                                    Play Store
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </motion.section>
+
+                {/* New Newsletter Section */}
+                <motion.section
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 1 }}
+                    className="bg-white py-24 dark:bg-gray-900"
+                >
+                    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                        <div className="text-center">
+                            <h2 className="mb-4 text-3xl font-bold text-gray-900 dark:text-white">Stay Updated</h2>
+                            <p className="mb-8 text-gray-600 dark:text-gray-300">Subscribe to our newsletter for the latest updates and features.</p>
+                            <form className="mx-auto flex max-w-md flex-col gap-4 sm:flex-row">
+                                <input
+                                    type="email"
+                                    placeholder="Enter your email"
+                                    className="flex-1 rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800"
+                                />
+                                <button className="rounded-lg bg-blue-600 px-6 py-2 text-white transition-colors hover:bg-blue-700">Subscribe</button>
+                            </form>
+                        </div>
+                    </div>
+                </motion.section>
 
                 {/* Footer */}
                 <footer className="mt-24 bg-white/80 py-12 dark:bg-gray-900/80">
