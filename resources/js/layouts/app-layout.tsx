@@ -38,7 +38,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
     };
 
     return (
-        <div className="min-h-screen bg-neutral-100 transition-colors duration-200 dark:bg-neutral-900">
+        <div className="min-h-screen bg-neutral-100 transition-colors duration-200 dark:bg-gray-900">
             <Navbar
                 darkMode={darkMode}
                 toggleDarkMode={toggleDarkMode}
