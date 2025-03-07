@@ -15,6 +15,13 @@ interface Comment {
         avatar: string;
     };
     timestamp: string;
+    reactions: {
+        type: string;
+        count: number;
+    }[];
+    userReaction?: string;
+    replies: Comment[];
+    parent_id?: number;
 }
 
 interface ReactionCounts {
@@ -59,6 +66,8 @@ export default function Post({ post }: PostProps) {
     const [userReaction, setUserReaction] = useState<string | undefined>(post.userReaction);
     const [reactionCounts, setReactionCounts] = useState<ReactionCounts>(post.reactionCounts);
     const reactionPickerRef = useRef<HTMLDivElement>(null);
+    const [replyingTo, setReplyingTo] = useState<number | null>(null);
+    const [replyContent, setReplyContent] = useState('');
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -128,6 +137,109 @@ export default function Post({ post }: PostProps) {
             setIsSubmitting(false);
         }
     };
+
+    const handleCommentReaction = async (commentId: number) => {
+        try {
+            const response = await axios.post(`/comments/${commentId}/react`, { type: 'like' });
+
+            setComments(comments.map(comment => {
+                if (comment.id === commentId) {
+                    return {
+                        ...comment,
+                        reactions: response.data.reactions,
+                        userReaction: response.data.userReaction
+                    };
+                }
+                return comment;
+            }));
+        } catch (error) {
+            console.error('Error reacting to comment:', error);
+        }
+    };
+
+    const handleReply = async (commentId: number) => {
+        if (!replyContent.trim() || isSubmitting) return;
+
+        setIsSubmitting(true);
+        try {
+            const response = await axios.post(`/comments/${commentId}/reply`, {
+                content: replyContent,
+            });
+
+            setComments(comments.map(comment => {
+                if (comment.id === commentId) {
+                    return {
+                        ...comment,
+                        replies: [response.data.reply, ...comment.replies]
+                    };
+                }
+                return comment;
+            }));
+
+            setReplyContent('');
+            setReplyingTo(null);
+        } catch (error) {
+            console.error('Error posting reply:', error);
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const renderComment = (comment: Comment, isReply = false) => (
+        <div key={comment.id} className={`flex space-x-2 ${isReply ? 'ml-8 mt-2' : ''}`}>
+            <img src={comment.user.avatar} alt={comment.user.name} className="h-8 w-8 rounded-full" />
+            <div className="flex-1">
+                <div className="rounded-2xl bg-gray-100 px-3 py-2 dark:bg-gray-700">
+                    <p className="text-sm font-semibold">{comment.user.name}</p>
+                    <p className="text-sm">{comment.content}</p>
+                </div>
+                <div className="mt-1 flex space-x-3 text-xs text-gray-500">
+                    <button
+                        onClick={() => handleCommentReaction(comment.id)}
+                        className={`font-semibold hover:underline ${
+                            comment.userReaction ? 'text-blue-500' : ''
+                        }`}
+                    >
+                        Like {comment.reactions?.find(r => r.type === 'like')?.count || 0}
+                    </button>
+                    <button
+                        onClick={() => setReplyingTo(replyingTo === comment.id ? null : comment.id)}
+                        className="font-semibold hover:underline"
+                    >
+                        Reply
+                    </button>
+                    <span>{comment.timestamp}</span>
+                </div>
+
+                {replyingTo === comment.id && (
+                    <div className="mt-2">
+                        <form
+                            onSubmit={(e) => {
+                                e.preventDefault();
+                                handleReply(comment.id);
+                            }}
+                            className="flex items-center space-x-2"
+                        >
+                            <img src={post.user.avatar} alt="Your avatar" className="h-6 w-6 rounded-full" />
+                            <input
+                                type="text"
+                                value={replyContent}
+                                onChange={(e) => setReplyContent(e.target.value)}
+                                placeholder="Write a reply..."
+                                className="flex-1 rounded-full bg-gray-100 px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700"
+                            />
+                        </form>
+                    </div>
+                )}
+
+                {comment.replies?.length > 0 && (
+                    <div className="mt-2">
+                        {comment.replies.map(reply => renderComment(reply, true))}
+                    </div>
+                )}
+            </div>
+        </div>
+    );
 
     return (
         <div className="mb-4 overflow-hidden rounded-lg bg-white shadow-sm dark:bg-gray-800">
@@ -272,22 +384,7 @@ export default function Post({ post }: PostProps) {
                     </form>
 
                     <div className="space-y-3">
-                        {comments.map((comment) => (
-                            <div key={comment.id} className="flex space-x-2">
-                                <img src={comment.user.avatar} alt={comment.user.name} className="h-8 w-8 rounded-full" />
-                                <div>
-                                    <div className="rounded-2xl bg-gray-100 px-3 py-2 dark:bg-gray-700">
-                                        <p className="text-sm font-semibold">{comment.user.name}</p>
-                                        <p className="text-sm">{comment.content}</p>
-                                    </div>
-                                    <div className="mt-1 flex space-x-3 text-xs text-gray-500">
-                                        <button className="font-semibold hover:underline">Like</button>
-                                        <button className="font-semibold hover:underline">Reply</button>
-                                        <span>{comment.timestamp}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
+                        {comments.map(comment => renderComment(comment))}
                     </div>
                 </div>
             )}
