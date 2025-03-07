@@ -2,12 +2,6 @@ import axios from 'axios';
 import { useEffect, useState } from 'react';
 import Post from './Post';
 
-interface MediaItem {
-    id: number;
-    url: string;
-    type: 'image' | 'video';
-}
-
 interface PostData {
     id: number;
     user: {
@@ -16,7 +10,11 @@ interface PostData {
         timestamp: string;
     };
     content: string;
-    media: MediaItem[];
+    media: {
+        id: number;
+        url: string;
+        type: 'image' | 'video';
+    }[];
     likes: number;
     comments: number;
 }
