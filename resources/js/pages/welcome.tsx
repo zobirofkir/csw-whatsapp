@@ -1,9 +1,11 @@
 import { type SharedData } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
 import { motion } from 'framer-motion';
+import { useState } from 'react';
 
 export default function Welcome() {
     const { auth } = usePage<SharedData>().props;
+    const [email, setEmail] = useState('');
 
     return (
         <>
@@ -14,7 +16,7 @@ export default function Welcome() {
 
             <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white dark:from-gray-900 dark:to-gray-800">
                 {/* Navigation */}
-                <nav className="fixed w-full bg-white/80 shadow-sm backdrop-blur-md dark:bg-gray-900/80">
+                <nav className="fixed z-50 w-full bg-white/80 shadow-sm backdrop-blur-md dark:bg-gray-900/80">
                     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                         <div className="flex h-16 justify-between">
                             <div className="flex items-center">
@@ -43,8 +45,11 @@ export default function Welcome() {
                     </div>
                 </nav>
 
-                {/* Hero Section */}
-                <div className="px-4 pt-32 pb-20 sm:px-6 lg:px-8">
+                {/* Hero Section with Animation */}
+                <div className="relative overflow-hidden px-4 pt-32 pb-20 sm:px-6 lg:px-8">
+                    <div className="absolute inset-0 -z-10">
+                        <div className="absolute inset-0 bg-[radial-gradient(45rem_50rem_at_top,theme(colors.blue.100),transparent)] opacity-20 dark:bg-[radial-gradient(45rem_50rem_at_top,theme(colors.blue.900),transparent)]"></div>
+                    </div>
                     <div className="mx-auto max-w-7xl">
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
@@ -52,17 +57,41 @@ export default function Welcome() {
                             transition={{ duration: 0.8 }}
                             className="text-center"
                         >
-                            <h1 className="mb-6 text-4xl font-bold text-gray-900 sm:text-6xl dark:text-white">
+                            <h1 className="mb-6 text-5xl font-bold text-gray-900 sm:text-7xl dark:text-white">
                                 Connect with Friends,
                                 <br />
-                                <span className="text-blue-600 dark:text-blue-400">Share Your Story</span>
+                                <span className="bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-blue-600 text-transparent dark:text-blue-400">
+                                    Share Your Story
+                                </span>
                             </h1>
-                            <p className="mb-8 text-xl text-gray-600 dark:text-gray-300">
-                                Join millions of people and stay connected with friends, family, and communities
+                            <p className="mx-auto mb-8 max-w-2xl text-xl text-gray-600 dark:text-gray-300">
+                                Join millions of people and stay connected with friends, family, and communities. Experience the next generation of
+                                social networking.
                             </p>
+
+                            {/* Early Access Form */}
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.4 }}
+                                className="mx-auto mt-8 max-w-md"
+                            >
+                                <form className="flex gap-2" onSubmit={(e) => e.preventDefault()}>
+                                    <input
+                                        type="email"
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        placeholder="Enter your email"
+                                        className="flex-1 rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800"
+                                    />
+                                    <button className="rounded-lg bg-blue-600 px-6 py-2 text-white transition-colors hover:bg-blue-700">
+                                        Get Early Access
+                                    </button>
+                                </form>
+                            </motion.div>
                         </motion.div>
 
-                        {/* 3D Features Grid */}
+                        {/* Features Grid */}
                         <div className="mt-16 grid grid-cols-1 gap-8 md:grid-cols-3">
                             <motion.div
                                 initial={{ opacity: 0, y: 20 }}
@@ -125,8 +154,175 @@ export default function Welcome() {
                             </motion.div>
                         </div>
 
+                        {/* Statistics Section */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.8 }}
+                            className="mt-24 grid grid-cols-2 gap-8 md:grid-cols-4"
+                        >
+                            {[
+                                { number: '10M+', label: 'Active Users' },
+                                { number: '150+', label: 'Countries' },
+                                { number: '99.9%', label: 'Uptime' },
+                                { number: '24/7', label: 'Support' },
+                            ].map((stat, index) => (
+                                <div key={index} className="text-center">
+                                    <div className="text-4xl font-bold text-blue-600 dark:text-blue-400">{stat.number}</div>
+                                    <div className="mt-2 text-gray-600 dark:text-gray-300">{stat.label}</div>
+                                </div>
+                            ))}
+                        </motion.div>
+
+                        {/* Testimonials Section */}
+                        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1 }} className="mt-24">
+                            <h2 className="mb-12 text-center text-3xl font-bold text-gray-900 dark:text-white">What Our Users Say</h2>
+                            <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+                                {[
+                                    {
+                                        quote: "SocialConnect has transformed how I stay in touch with my friends abroad. It's intuitive and fun to use!",
+                                        author: 'Sarah Johnson',
+                                        role: 'Digital Nomad',
+                                    },
+                                    {
+                                        quote: "The best social platform I've used. The community features are outstanding!",
+                                        author: 'Michael Chen',
+                                        role: 'Community Leader',
+                                    },
+                                    {
+                                        quote: 'Privacy-focused and user-friendly. Finally, a social network that puts users first!',
+                                        author: 'Emma Williams',
+                                        role: 'Privacy Advocate',
+                                    },
+                                ].map((testimonial, index) => (
+                                    <div key={index} className="rounded-xl bg-white p-6 shadow-lg dark:bg-gray-800">
+                                        <div className="mb-4 flex items-center">
+                                            <div className="h-12 w-12 rounded-full bg-blue-100 dark:bg-blue-900"></div>
+                                            <div className="ml-4">
+                                                <div className="font-semibold text-gray-900 dark:text-white">{testimonial.author}</div>
+                                                <div className="text-sm text-gray-600 dark:text-gray-300">{testimonial.role}</div>
+                                            </div>
+                                        </div>
+                                        <p className="text-gray-600 italic dark:text-gray-300">"{testimonial.quote}"</p>
+                                    </div>
+                                ))}
+                            </div>
+                        </motion.div>
+
+                        {/* CTA Section */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 1.2 }}
+                            className="mt-24 rounded-2xl bg-blue-600 p-12 text-center dark:bg-blue-700"
+                        >
+                            <h2 className="mb-4 text-3xl font-bold text-white">Ready to Get Started?</h2>
+                            <p className="mx-auto mb-8 max-w-2xl text-blue-100">
+                                Join our growing community today and experience the future of social networking.
+                            </p>
+                            <Link
+                                href={route('login')}
+                                className="inline-flex items-center rounded-lg bg-white px-6 py-3 text-lg font-semibold text-blue-600 transition-colors hover:bg-blue-50"
+                            >
+                                Get Started
+                                <svg className="ml-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                                </svg>
+                            </Link>
+                        </motion.div>
                     </div>
                 </div>
+
+                {/* Footer */}
+                <footer className="mt-24 bg-white/80 py-12 dark:bg-gray-900/80">
+                    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                        <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
+                            <div>
+                                <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">Product</h3>
+                                <ul className="space-y-2">
+                                    <li>
+                                        <a href="#" className="text-gray-600 hover:text-blue-600 dark:text-gray-300">
+                                            Features
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="#" className="text-gray-600 hover:text-blue-600 dark:text-gray-300">
+                                            Pricing
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="#" className="text-gray-600 hover:text-blue-600 dark:text-gray-300">
+                                            Security
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">Company</h3>
+                                <ul className="space-y-2">
+                                    <li>
+                                        <a href="#" className="text-gray-600 hover:text-blue-600 dark:text-gray-300">
+                                            About
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="#" className="text-gray-600 hover:text-blue-600 dark:text-gray-300">
+                                            Blog
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="#" className="text-gray-600 hover:text-blue-600 dark:text-gray-300">
+                                            Careers
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">Resources</h3>
+                                <ul className="space-y-2">
+                                    <li>
+                                        <a href="#" className="text-gray-600 hover:text-blue-600 dark:text-gray-300">
+                                            Documentation
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="#" className="text-gray-600 hover:text-blue-600 dark:text-gray-300">
+                                            Help Center
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="#" className="text-gray-600 hover:text-blue-600 dark:text-gray-300">
+                                            Community
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">Legal</h3>
+                                <ul className="space-y-2">
+                                    <li>
+                                        <a href="#" className="text-gray-600 hover:text-blue-600 dark:text-gray-300">
+                                            Privacy
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="#" className="text-gray-600 hover:text-blue-600 dark:text-gray-300">
+                                            Terms
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="#" className="text-gray-600 hover:text-blue-600 dark:text-gray-300">
+                                            Cookie Policy
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div className="mt-12 border-t border-gray-200 pt-8 text-center text-gray-600 dark:border-gray-700 dark:text-gray-300">
+                            © 2024 SocialConnect. All rights reserved.
+                        </div>
+                    </div>
+                </footer>
             </div>
         </>
     );
