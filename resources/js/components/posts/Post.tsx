@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 
 interface MediaItem {
@@ -17,6 +17,10 @@ interface Comment {
     timestamp: string;
 }
 
+interface ReactionCounts {
+    [key: string]: number;
+}
+
 interface PostProps {
     post: {
         id: number;
@@ -29,9 +33,20 @@ interface PostProps {
         media: MediaItem[];
         likes: number;
         hasReacted: boolean;
+        userReaction?: string;
+        reactionCounts: ReactionCounts;
         comments: Comment[];
     };
 }
+
+const REACTIONS = {
+    like: '👍',
+    love: '❤️',
+    haha: '😂',
+    wow: '😮',
+    sad: '😢',
+    angry: '😠'
+};
 
 export default function Post({ post }: PostProps) {
     const [likes, setLikes] = useState(post.likes);
@@ -40,17 +55,33 @@ export default function Post({ post }: PostProps) {
     const [showComments, setShowComments] = useState(false);
     const [newComment, setNewComment] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [showReactionPicker, setShowReactionPicker] = useState(false);
+    const [userReaction, setUserReaction] = useState<string | undefined>(post.userReaction);
+    const [reactionCounts, setReactionCounts] = useState<ReactionCounts>(post.reactionCounts);
+    const reactionPickerRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (reactionPickerRef.current && !reactionPickerRef.current.contains(event.target as Node)) {
+                setShowReactionPicker(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
     const displayedMedia = post.media?.slice(0, 4);
     const remainingMedia = post.media ? post.media.length - 4 : 0;
 
-    const handleReaction = async () => {
+    const handleReaction = async (type: string) => {
         try {
-            const response = await axios.post(`/posts/${post.id}/react`);
-            setLikes(response.data.likes);
-            setHasReacted(response.data.hasReacted);
+            const response = await axios.post(`/posts/${post.id}/react`, { type });
+            setReactionCounts(response.data.reactionCounts);
+            setUserReaction(response.data.userReaction);
+            setShowReactionPicker(false);
         } catch (error) {
-            console.error('Error toggling reaction:', error);
+            console.error('Error setting reaction:', error);
         }
     };
 
@@ -125,14 +156,41 @@ export default function Post({ post }: PostProps) {
             <div className="px-4">
                 <div className="flex items-center justify-between border-b border-gray-100 py-2.5 text-[15px] text-gray-500 dark:border-gray-700">
                     <div className="flex items-center space-x-2">
-                        <span className="flex items-center">
-                            <img
-                                className="h-[18px]"
-                                src={hasReacted ? "/images/liked.svg" : "/images/like.svg"}
-                                alt=""
-                            />
-                            <span className="ml-1">{likes}</span>
-                        </span>
+                        <div className="relative">
+                            <span
+                                className="flex items-center cursor-pointer"
+                                onClick={() => setShowReactionPicker(!showReactionPicker)}
+                            >
+                                {Object.entries(reactionCounts)
+                                    .filter(([_, count]) => count > 0)
+                                    .map(([type, count]) => (
+                                        <span key={type} className="mr-1" title={`${count} ${type}`}>
+                                            {REACTIONS[type as keyof typeof REACTIONS]}
+                                        </span>
+                                    ))}
+                                <span className="ml-1">{Object.values(reactionCounts).reduce((a, b) => a + b, 0)}</span>
+                            </span>
+
+                            {showReactionPicker && (
+                                <div
+                                    ref={reactionPickerRef}
+                                    className="absolute bottom-full left-0 mb-2 flex space-x-2 rounded-full bg-white p-2 shadow-lg dark:bg-gray-700"
+                                >
+                                    {Object.entries(REACTIONS).map(([type, emoji]) => (
+                                        <button
+                                            key={type}
+                                            onClick={() => handleReaction(type)}
+                                            className={`transform cursor-pointer rounded-full p-2 transition hover:scale-125 ${
+                                                userReaction === type ? 'bg-gray-100 dark:bg-gray-600' : ''
+                                            }`}
+                                            title={type}
+                                        >
+                                            {emoji}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
                     </div>
                     <span
                         onClick={() => setShowComments(!showComments)}
@@ -143,9 +201,10 @@ export default function Post({ post }: PostProps) {
                 </div>
 
                 <PostActions
-                    onLike={handleReaction}
-                    hasReacted={hasReacted}
+                    onLike={() => setShowReactionPicker(!showReactionPicker)}
+                    hasReacted={!!userReaction}
                     onCommentClick={() => setShowComments(!showComments)}
+                    activeReaction={userReaction}
                 />
 
                 {showComments && (
@@ -209,60 +268,42 @@ function getMediaAspectClass(totalMedia: number, index: number): string {
     return 'aspect-square';
 }
 
-function PostActions({ onLike, hasReacted, onCommentClick }: { onLike: () => void, hasReacted: boolean, onCommentClick: () => void }) {
-    const iconMap = {
-        like: (
-            <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M1.5 12.5h3a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-7a.5.5 0 0 1 .5-.5zm9.147-5.992c1.381-.239 2.345.154 2.871 1.178.526 1.024.526 2.287 0 3.793l-.25.61h4.365c1.035 0 1.905.74 1.949 1.715l.006.14v.608a3.314 3.314 0 0 1-.46 1.698l-2.052 3.774a1.59 1.59 0 0 1-1.352.828h-7.111a.505.505 0 0 1-.501-.505V9.556c0-.272.199-.49.454-.505z" />
-            </svg>
-        ),
-        comment: (
-            <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M1.5 12.5v-7a.5.5 0 0 1 .5-.5h13a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-.5.5h-3.293l-3.207 3.207-3.207-3.207H2a.5.5 0 0 1-.5-.5z" />
-            </svg>
-        ),
-        share: (
-            <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12.162 7.338c.176.123.338.245.338.674 0 .43-.229.604-.474.725.1.163.132.36.089.546-.077.344-.392.611-.672.69.121.194.159.385.015.62-.185.295-.346.407-1.058.407H7.5c-.988 0-1.5-.546-1.5-1V7.665c0-1.23 1.467-2.275 1.467-3.13L7.361 3.47c-.005-.065.008-.224.058-.27.08-.079.301-.2.635-.2.218 0 .363.041.534.123.581.277.732.978.732 1.542 0 .271-.414 1.083-.47 1.364 0 0 .867-.192 1.879-.199 1.061-.006 1.749.19 1.749.842 0 .261-.219.523-.316.666zM3.6 7h.8a.6.6 0 0 1 .6.6v3.8a.6.6 0 0 1-.6.6h-.8a.6.6 0 0 1-.6-.6V7.6a.6.6 0 0 1 .6-.6z" />
-            </svg>
-        ),
+function PostActions({ onLike, hasReacted, onCommentClick, activeReaction }: {
+    onLike: () => void,
+    hasReacted: boolean,
+    onCommentClick: () => void,
+    activeReaction?: string
+}) {
+    const getReactionEmoji = () => {
+        if (!activeReaction) return '👍';
+        return REACTIONS[activeReaction as keyof typeof REACTIONS] || '👍';
     };
 
     return (
         <div className="flex justify-between py-1">
-            <ActionButton icon="like" text="Like" onClick={onLike} active={hasReacted} />
+            <button
+                onClick={onLike}
+                className={`flex flex-1 items-center justify-center space-x-2 rounded-lg py-2 text-[15px] font-medium ${
+                    hasReacted ? 'text-blue-500' : 'text-gray-500'
+                } hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700`}
+            >
+                <span className="text-xl">{getReactionEmoji()}</span>
+                <span>React</span>
+            </button>
             <ActionButton icon="comment" text="Comment" onClick={onCommentClick} />
             <ActionButton icon="share" text="Share" onClick={() => {}} />
         </div>
     );
 }
 
-function ActionButton({ icon, text, onClick, active = false }: { icon: string; text: string; onClick: () => void; active?: boolean }) {
-    const iconMap = {
-        like: (
-            <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M1.5 12.5h3a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-7a.5.5 0 0 1 .5-.5zm9.147-5.992c1.381-.239 2.345.154 2.871 1.178.526 1.024.526 2.287 0 3.793l-.25.61h4.365c1.035 0 1.905.74 1.949 1.715l.006.14v.608a3.314 3.314 0 0 1-.46 1.698l-2.052 3.774a1.59 1.59 0 0 1-1.352.828h-7.111a.505.505 0 0 1-.501-.505V9.556c0-.272.199-.49.454-.505z" />
-            </svg>
-        ),
-        comment: (
-            <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M1.5 12.5v-7a.5.5 0 0 1 .5-.5h13a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-.5.5h-3.293l-3.207 3.207-3.207-3.207H2a.5.5 0 0 1-.5-.5z" />
-            </svg>
-        ),
-        share: (
-            <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12.162 7.338c.176.123.338.245.338.674 0 .43-.229.604-.474.725.1.163.132.36.089.546-.077.344-.392.611-.672.69.121.194.159.385.015.62-.185.295-.346.407-1.058.407H7.5c-.988 0-1.5-.546-1.5-1V7.665c0-1.23 1.467-2.275 1.467-3.13L7.361 3.47c-.005-.065.008-.224.058-.27.08-.079.301-.2.635-.2.218 0 .363.041.534.123.581.277.732.978.732 1.542 0 .271-.414 1.083-.47 1.364 0 0 .867-.192 1.879-.199 1.061-.006 1.749.19 1.749.842 0 .261-.219.523-.316.666zM3.6 7h.8a.6.6 0 0 1 .6.6v3.8a.6.6 0 0 1-.6.6h-.8a.6.6 0 0 1-.6-.6V7.6a.6.6 0 0 1 .6-.6z" />
-            </svg>
-        ),
-    };
-
-    const className = `flex flex-1 items-center justify-center space-x-2 rounded-lg py-2 text-[15px] font-medium ${
-        active ? 'text-blue-500' : 'text-gray-500'
-    } hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700`;
+function ActionButton({ icon, text, onClick }: { icon: string; text: string; onClick: () => void }) {
+    const className = `flex flex-1 items-center justify-center space-x-2 rounded-lg py-2 text-[15px] font-medium text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700`;
 
     return (
         <button className={className} onClick={onClick}>
-            {iconMap[icon as keyof typeof iconMap]}
+            <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M1.5 12.5h3a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-7a.5.5 0 0 1 .5-.5zm9.147-5.992c1.381-.239 2.345.154 2.871 1.178.526 1.024.526 2.287 0 3.793l-.25.61h4.365c1.035 0 1.905.74 1.949 1.715l.006.14v.608a3.314 3.314 0 0 1-.46 1.698l-2.052 3.774a1.59 1.59 0 0 1-1.352.828h-7.111a.505.505 0 0 1-.501-.505V9.556c0-.272.199-.49.454-.505z" />
+            </svg>
             <span>{text}</span>
         </button>
     );

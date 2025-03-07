@@ -16,6 +16,16 @@ class Reaction extends Model
         'type'
     ];
 
+    // Available reaction types
+    public static array $types = [
+        'like' => '👍',
+        'love' => '❤️',
+        'haha' => '😂',
+        'wow' => '😮',
+        'sad' => '😢',
+        'angry' => '😠'
+    ];
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

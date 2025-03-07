@@ -27,6 +27,17 @@ class PostController extends Controller
             ->latest()
             ->get()
             ->map(function ($post) use ($user) {
+                $reactionCounts = $post->reactions()
+                    ->select('type')
+                    ->selectRaw('count(*) as count')
+                    ->groupBy('type')
+                    ->pluck('count', 'type')
+                    ->toArray();
+
+                $userReaction = $post->reactions()
+                    ->where('user_id', $user->id)
+                    ->value('type');
+
                 return [
                     'id' => $post->id,
                     'user' => [
@@ -42,8 +53,10 @@ class PostController extends Controller
                             'type' => $media->type,
                         ];
                     }),
-                    'likes' => $post->reactions->count(),
-                    'hasReacted' => $post->hasReacted($user->id),
+                    'reactionCounts' => $reactionCounts,
+                    'userReaction' => $userReaction,
+                    'likes' => array_sum($reactionCounts),
+                    'hasReacted' => (bool) $userReaction,
                     'comments' => $post->comments->map(function ($comment) {
                         return [
                             'id' => $comment->id,
@@ -73,28 +86,45 @@ class PostController extends Controller
         ]);
     }
 
-    public function toggleReaction($postId): JsonResponse
+    public function toggleReaction(Request $request, $postId): JsonResponse
     {
         $user = auth()->user();
         $post = Post::findOrFail($postId);
+        $type = $request->input('type', 'like');
+
+        if (!array_key_exists($type, Reaction::$types)) {
+            return response()->json(['message' => 'Invalid reaction type'], 400);
+        }
 
         $existingReaction = $post->reactions()->where('user_id', $user->id)->first();
 
         if ($existingReaction) {
-            $existingReaction->delete();
-            $action = 'removed';
+            if ($existingReaction->type === $type) {
+                $existingReaction->delete();
+                $userReaction = null;
+            } else {
+                $existingReaction->update(['type' => $type]);
+                $userReaction = $type;
+            }
         } else {
             $post->reactions()->create([
                 'user_id' => $user->id,
-                'type' => 'like'
+                'type' => $type
             ]);
-            $action = 'added';
+            $userReaction = $type;
         }
 
+        $reactionCounts = $post->reactions()
+            ->select('type')
+            ->selectRaw('count(*) as count')
+            ->groupBy('type')
+            ->pluck('count', 'type')
+            ->toArray();
+
         return response()->json([
-            'message' => "Reaction {$action} successfully",
-            'likes' => $post->reactions()->count(),
-            'hasReacted' => !$existingReaction,
+            'message' => 'Reaction updated successfully',
+            'reactionCounts' => $reactionCounts,
+            'userReaction' => $userReaction,
         ]);
     }
 
