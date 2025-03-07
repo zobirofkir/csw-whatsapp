@@ -33,4 +33,28 @@ class Post extends Model
     {
         return $this->hasMany(PostMedia::class);
     }
+
+    /**
+     * Get the reactions for the post.
+     */
+    public function reactions(): HasMany
+    {
+        return $this->hasMany(Reaction::class);
+    }
+
+    /**
+     * Get the comments for the post.
+     */
+    public function comments(): HasMany
+    {
+        return $this->hasMany(Comment::class)->orderBy('created_at', 'desc');
+    }
+
+    /**
+     * Check if the authenticated user has reacted to this post
+     */
+    public function hasReacted($userId): bool
+    {
+        return $this->reactions()->where('user_id', $userId)->exists();
+    }
 }

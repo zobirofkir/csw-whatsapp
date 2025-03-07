@@ -6,6 +6,9 @@ use App\Services\PostService;
 use App\Http\Requests\StorePostRequest;
 use Illuminate\Http\JsonResponse;
 use App\Models\Post;
+use App\Models\Reaction;
+use App\Models\Comment;
+use Illuminate\Http\Request;
 
 class PostController extends Controller
 {
@@ -18,12 +21,12 @@ class PostController extends Controller
 
     public function index(): JsonResponse
     {
-        $posts = Post::with(['user', 'media'])
+        $user = auth()->user();
+
+        $posts = Post::with(['user', 'media', 'reactions', 'comments.user'])
             ->latest()
             ->get()
-            ->map(function ($post) {
-                \Log::info('Post data:', ['post' => $post->toArray()]);
-
+            ->map(function ($post) use ($user) {
                 return [
                     'id' => $post->id,
                     'user' => [
@@ -39,8 +42,19 @@ class PostController extends Controller
                             'type' => $media->type,
                         ];
                     }),
-                    'likes' => 0, // You can implement this later
-                    'comments' => 0, // You can implement this later
+                    'likes' => $post->reactions->count(),
+                    'hasReacted' => $post->hasReacted($user->id),
+                    'comments' => $post->comments->map(function ($comment) {
+                        return [
+                            'id' => $comment->id,
+                            'content' => $comment->content,
+                            'user' => [
+                                'name' => $comment->user->name,
+                                'avatar' => $comment->user->avatar ?? 'https://i.pravatar.cc/150?u=' . $comment->user->id,
+                            ],
+                            'timestamp' => $comment->created_at->diffForHumans(),
+                        ];
+                    }),
                 ];
             });
 
@@ -56,6 +70,59 @@ class PostController extends Controller
         return response()->json([
             'message' => 'Post created successfully',
             'post' => $post,
+        ]);
+    }
+
+    public function toggleReaction($postId): JsonResponse
+    {
+        $user = auth()->user();
+        $post = Post::findOrFail($postId);
+
+        $existingReaction = $post->reactions()->where('user_id', $user->id)->first();
+
+        if ($existingReaction) {
+            $existingReaction->delete();
+            $action = 'removed';
+        } else {
+            $post->reactions()->create([
+                'user_id' => $user->id,
+                'type' => 'like'
+            ]);
+            $action = 'added';
+        }
+
+        return response()->json([
+            'message' => "Reaction {$action} successfully",
+            'likes' => $post->reactions()->count(),
+            'hasReacted' => !$existingReaction,
+        ]);
+    }
+
+    public function comment(Request $request, $postId): JsonResponse
+    {
+        $request->validate([
+            'content' => 'required|string|max:1000',
+        ]);
+
+        $post = Post::findOrFail($postId);
+        $comment = $post->comments()->create([
+            'user_id' => auth()->id(),
+            'content' => $request->content,
+        ]);
+
+        $comment->load('user');
+
+        return response()->json([
+            'message' => 'Comment added successfully',
+            'comment' => [
+                'id' => $comment->id,
+                'content' => $comment->content,
+                'user' => [
+                    'name' => $comment->user->name,
+                    'avatar' => $comment->user->avatar ?? 'https://i.pravatar.cc/150?u=' . $comment->user->id,
+                ],
+                'timestamp' => $comment->created_at->diffForHumans(),
+            ],
         ]);
     }
 }

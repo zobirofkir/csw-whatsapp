@@ -1,7 +1,20 @@
+import { useState } from 'react';
+import axios from 'axios';
+
 interface MediaItem {
     id: number;
     url: string;
     type: 'image' | 'video';
+}
+
+interface Comment {
+    id: number;
+    content: string;
+    user: {
+        name: string;
+        avatar: string;
+    };
+    timestamp: string;
 }
 
 interface PostProps {
@@ -15,13 +28,49 @@ interface PostProps {
         content: string;
         media: MediaItem[];
         likes: number;
-        comments: number;
+        hasReacted: boolean;
+        comments: Comment[];
     };
 }
 
 export default function Post({ post }: PostProps) {
+    const [likes, setLikes] = useState(post.likes);
+    const [hasReacted, setHasReacted] = useState(post.hasReacted);
+    const [comments, setComments] = useState(post.comments);
+    const [showComments, setShowComments] = useState(false);
+    const [newComment, setNewComment] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
     const displayedMedia = post.media?.slice(0, 4);
     const remainingMedia = post.media ? post.media.length - 4 : 0;
+
+    const handleReaction = async () => {
+        try {
+            const response = await axios.post(`/posts/${post.id}/react`);
+            setLikes(response.data.likes);
+            setHasReacted(response.data.hasReacted);
+        } catch (error) {
+            console.error('Error toggling reaction:', error);
+        }
+    };
+
+    const handleComment = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!newComment.trim() || isSubmitting) return;
+
+        setIsSubmitting(true);
+        try {
+            const response = await axios.post(`/posts/${post.id}/comment`, {
+                content: newComment
+            });
+            setComments([response.data.comment, ...comments]);
+            setNewComment('');
+        } catch (error) {
+            console.error('Error posting comment:', error);
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
 
     return (
         <div className="mb-3 rounded-lg bg-white shadow-sm dark:bg-gray-800">
@@ -79,15 +128,58 @@ export default function Post({ post }: PostProps) {
                         <span className="flex items-center">
                             <img
                                 className="h-[18px]"
-                                src="data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' viewBox='0 0 16 16'%3e%3cdefs%3e%3clinearGradient id='a' x1='50%25' x2='50%25' y1='0%25' y2='100%25'%3e%3cstop offset='0%25' stop-color='%2318AFFF'/%3e%3cstop offset='100%25' stop-color='%230062DF'/%3e%3c/linearGradient%3e%3c/defs%3e%3cg fill='none'%3e%3cpath fill='url(%23a)' d='M8 0a8 8 0 100 16A8 8 0 008 0z'/%3e%3cpath fill='white' d='M12.162 7.338c.176.123.338.245.338.674 0 .43-.229.604-.474.725a.73.73 0 01.089.546c-.077.344-.392.611-.672.69.121.194.159.385.015.62-.185.295-.346.407-1.058.407H7.5c-.988 0-1.5-.546-1.5-1V7.665c0-1.23 1.467-2.275 1.467-3.13L7.361 3.47c-.005-.065.008-.224.058-.27.08-.079.301-.2.635-.2.218 0 .363.041.534.123.581.277.732.978.732 1.542 0 .271-.414 1.083-.47 1.364 0 0 .867-.192 1.879-.199 1.061-.006 1.749.19 1.749.842 0 .261-.219.523-.316.666z'/%3e%3c/g%3e%3c/svg%3e"
+                                src={hasReacted ? "/images/liked.svg" : "/images/like.svg"}
                                 alt=""
                             />
-                            <span className="ml-1">{post.likes}</span>
+                            <span className="ml-1">{likes}</span>
                         </span>
                     </div>
-                    <span className="cursor-pointer text-gray-500 hover:underline dark:text-gray-400">{post.comments} comments</span>
+                    <span
+                        onClick={() => setShowComments(!showComments)}
+                        className="cursor-pointer text-gray-500 hover:underline dark:text-gray-400"
+                    >
+                        {comments.length} comments
+                    </span>
                 </div>
-                <PostActions />
+
+                <PostActions
+                    onLike={handleReaction}
+                    hasReacted={hasReacted}
+                    onCommentClick={() => setShowComments(!showComments)}
+                />
+
+                {showComments && (
+                    <div className="mt-4">
+                        <form onSubmit={handleComment} className="mb-4">
+                            <input
+                                type="text"
+                                value={newComment}
+                                onChange={(e) => setNewComment(e.target.value)}
+                                placeholder="Write a comment..."
+                                className="w-full rounded-lg border border-gray-200 p-2 dark:border-gray-700 dark:bg-gray-800"
+                            />
+                        </form>
+
+                        <div className="space-y-4">
+                            {comments.map((comment) => (
+                                <div key={comment.id} className="flex space-x-2">
+                                    <img
+                                        src={comment.user.avatar}
+                                        alt={comment.user.name}
+                                        className="h-8 w-8 rounded-full"
+                                    />
+                                    <div className="flex-1">
+                                        <div className="rounded-lg bg-gray-100 p-2 dark:bg-gray-700">
+                                            <p className="font-semibold">{comment.user.name}</p>
+                                            <p>{comment.content}</p>
+                                        </div>
+                                        <span className="text-xs text-gray-500">{comment.timestamp}</span>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );
@@ -117,17 +209,7 @@ function getMediaAspectClass(totalMedia: number, index: number): string {
     return 'aspect-square';
 }
 
-function PostActions() {
-    return (
-        <div className="flex justify-between py-1">
-            <ActionButton icon="like" text="Like" />
-            <ActionButton icon="comment" text="Comment" />
-            <ActionButton icon="share" text="Share" />
-        </div>
-    );
-}
-
-function ActionButton({ icon, text }: { icon: string; text: string }) {
+function PostActions({ onLike, hasReacted, onCommentClick }: { onLike: () => void, hasReacted: boolean, onCommentClick: () => void }) {
     const iconMap = {
         like: (
             <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
@@ -147,7 +229,39 @@ function ActionButton({ icon, text }: { icon: string; text: string }) {
     };
 
     return (
-        <button className="flex flex-1 items-center justify-center space-x-2 rounded-lg py-2 text-[15px] font-medium text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700">
+        <div className="flex justify-between py-1">
+            <ActionButton icon="like" text="Like" onClick={onLike} active={hasReacted} />
+            <ActionButton icon="comment" text="Comment" onClick={onCommentClick} />
+            <ActionButton icon="share" text="Share" onClick={() => {}} />
+        </div>
+    );
+}
+
+function ActionButton({ icon, text, onClick, active = false }: { icon: string; text: string; onClick: () => void; active?: boolean }) {
+    const iconMap = {
+        like: (
+            <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M1.5 12.5h3a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-7a.5.5 0 0 1 .5-.5zm9.147-5.992c1.381-.239 2.345.154 2.871 1.178.526 1.024.526 2.287 0 3.793l-.25.61h4.365c1.035 0 1.905.74 1.949 1.715l.006.14v.608a3.314 3.314 0 0 1-.46 1.698l-2.052 3.774a1.59 1.59 0 0 1-1.352.828h-7.111a.505.505 0 0 1-.501-.505V9.556c0-.272.199-.49.454-.505z" />
+            </svg>
+        ),
+        comment: (
+            <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M1.5 12.5v-7a.5.5 0 0 1 .5-.5h13a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-.5.5h-3.293l-3.207 3.207-3.207-3.207H2a.5.5 0 0 1-.5-.5z" />
+            </svg>
+        ),
+        share: (
+            <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12.162 7.338c.176.123.338.245.338.674 0 .43-.229.604-.474.725.1.163.132.36.089.546-.077.344-.392.611-.672.69.121.194.159.385.015.62-.185.295-.346.407-1.058.407H7.5c-.988 0-1.5-.546-1.5-1V7.665c0-1.23 1.467-2.275 1.467-3.13L7.361 3.47c-.005-.065.008-.224.058-.27.08-.079.301-.2.635-.2.218 0 .363.041.534.123.581.277.732.978.732 1.542 0 .271-.414 1.083-.47 1.364 0 0 .867-.192 1.879-.199 1.061-.006 1.749.19 1.749.842 0 .261-.219.523-.316.666zM3.6 7h.8a.6.6 0 0 1 .6.6v3.8a.6.6 0 0 1-.6.6h-.8a.6.6 0 0 1-.6-.6V7.6a.6.6 0 0 1 .6-.6z" />
+            </svg>
+        ),
+    };
+
+    const className = `flex flex-1 items-center justify-center space-x-2 rounded-lg py-2 text-[15px] font-medium ${
+        active ? 'text-blue-500' : 'text-gray-500'
+    } hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700`;
+
+    return (
+        <button className={className} onClick={onClick}>
             {iconMap[icon as keyof typeof iconMap]}
             <span>{text}</span>
         </button>
