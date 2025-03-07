@@ -1,26 +1,13 @@
 <?php
 
+use App\Http\Controllers\PageController;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
 use Laravel\WorkOS\Http\Middleware\ValidateSessionWithWorkOS;
 
-Route::get('/', function () {
-    return Inertia::render('welcome');
-})->name('home');
+Route::get('/', [PageController::class, 'welcome'])->name('home');
 
-Route::middleware([
-    'auth',
-    ValidateSessionWithWorkOS::class,
-])->group(function () {
-    Route::get('/account', function () {
-        return Inertia::render('account');
-    })->name('account');
-
-    Route::get('/account/auth/{username}', function ($username) {
-        return Inertia::render('account', [
-            'username' => $username
-        ]);
-    })->name('account.auth');
+Route::controller(PageController::class)->middleware([ 'auth',ValidateSessionWithWorkOS::class ])->group(function () {
+    Route::get('/account/auth/{username}', 'accountAuth')->name('account.auth');
 });
 
 require __DIR__.'/settings.php';
