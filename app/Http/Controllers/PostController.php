@@ -2,89 +2,33 @@
 
 namespace App\Http\Controllers;
 
+use App\DTOs\PostDTO;
 use App\Services\PostService;
+use App\Services\ReactionService;
 use App\Http\Requests\StorePostRequest;
-use Illuminate\Http\JsonResponse;
 use App\Models\Post;
-use App\Models\Reaction;
 use App\Models\Comment;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class PostController extends Controller
 {
-    private PostService $postService;
-
-    public function __construct(PostService $postService)
-    {
-        $this->postService = $postService;
-    }
+    public function __construct(
+        private PostService $postService,
+        private ReactionService $reactionService
+    ) {}
 
     public function index(): JsonResponse
     {
-        $user = Auth::user();
-
-        $posts = Post::with(['user', 'media', 'reactions', 'comments.user', 'comments.reactions'])
-            ->latest()
-            ->get()
-            ->map(function ($post) use ($user) {
-                $reactionCounts = $post->reactions()
-                    ->select('type')
-                    ->selectRaw('count(*) as count')
-                    ->groupBy('type')
-                    ->pluck('count', 'type')
-                    ->toArray();
-
-                $userReaction = $post->reactions()
-                    ->where('user_id', $user->id)
-                    ->value('type');
-
-                return [
-                    'id' => $post->id,
-                    'user' => [
-                        'name' => $post->user->name,
-                        'avatar' => $post->user->avatar ?? 'https://i.pravatar.cc/150?u=' . $post->user->id,
-                        'timestamp' => $post->created_at->diffForHumans(),
-                    ],
-                    'content' => $post->content,
-                    'media' => $post->media->map(function ($media) {
-                        return [
-                            'id' => $media->id,
-                            'url' => asset('storage/' . $media->path),
-                            'type' => $media->type,
-                        ];
-                    }),
-                    'reactionCounts' => $reactionCounts,
-                    'userReaction' => $userReaction,
-                    'likes' => array_sum($reactionCounts),
-                    'hasReacted' => (bool) $userReaction,
-                    'comments' => $post->comments->map(function ($comment) use ($user) {
-                        return [
-                            'id' => $comment->id,
-                            'content' => $comment->content,
-                            'user' => [
-                                'name' => $comment->user->name,
-                                'avatar' => $comment->user->avatar ?? 'https://i.pravatar.cc/150?u=' . $comment->user->id,
-                            ],
-                            'timestamp' => $comment->created_at->diffForHumans(),
-                            'reactions' => $comment->reactions,
-                            'userReaction' => $comment->reactions()
-                                ->where('user_id', $user->id)
-                                ->value('type'),
-                            'replies' => []
-                        ];
-                    }),
-                ];
-            });
-
-        return response()->json([
-            'data' => $posts
-        ]);
+        $posts = $this->postService->getFormattedPosts(Auth::user());
+        return response()->json(['data' => $posts]);
     }
 
     public function store(StorePostRequest $request): JsonResponse
     {
-        $post = $this->postService->createPost($request->validated(), $request->user());
+        $postDTO = PostDTO::fromArray($request->validated());
+        $post = $this->postService->createPost($postDTO, $request->user());
 
         return response()->json([
             'message' => 'Post created successfully',
@@ -92,55 +36,26 @@ class PostController extends Controller
         ]);
     }
 
-    public function toggleReaction(Request $request, $postId): JsonResponse
+    public function toggleReaction(Request $request, Post $post): JsonResponse
     {
-        $user = Auth::user();
-        $post = Post::findOrFail($postId);
-        $type = $request->input('type');
+        $request->validate(['type' => 'required|string']);
 
-        if (!$type) {
-            return response()->json(['message' => 'Reaction type is required'], 400);
-        }
-
-        $existingReaction = $post->reactions()->where('user_id', $user->id)->first();
-
-        if ($existingReaction) {
-            if ($existingReaction->type === $type) {
-                $existingReaction->delete();
-                $userReaction = null;
-            } else {
-                $existingReaction->update(['type' => $type]);
-                $userReaction = $type;
-            }
-        } else {
-            $post->reactions()->create([
-                'user_id' => $user->id,
-                'type' => $type
-            ]);
-            $userReaction = $type;
-        }
-
-        $reactionCounts = $post->reactions()
-            ->select('type')
-            ->selectRaw('count(*) as count')
-            ->groupBy('type')
-            ->pluck('count', 'type')
-            ->toArray();
+        $result = $this->reactionService->toggleReaction(
+            $post,
+            Auth::user(),
+            $request->input('type')
+        );
 
         return response()->json([
             'message' => 'Reaction updated successfully',
-            'reactionCounts' => $reactionCounts,
-            'userReaction' => $userReaction,
+            ...$result
         ]);
     }
 
-    public function comment(Request $request, $postId): JsonResponse
+    public function comment(Request $request, Post $post): JsonResponse
     {
-        $request->validate([
-            'content' => 'required|string|max:1000',
-        ]);
+        $request->validate(['content' => 'required|string|max:1000']);
 
-        $post = Post::findOrFail($postId);
         $comment = $post->comments()->create([
             'user_id' => Auth::id(),
             'content' => $request->content,
@@ -150,67 +65,26 @@ class PostController extends Controller
 
         return response()->json([
             'message' => 'Comment added successfully',
-            'comment' => [
-                'id' => $comment->id,
-                'content' => $comment->content,
-                'user' => [
-                    'name' => $comment->user->name,
-                    'avatar' => $comment->user->avatar ?? 'https://i.pravatar.cc/150?u=' . $comment->user->id,
-                ],
-                'timestamp' => $comment->created_at->diffForHumans(),
-                'reactions' => [],
-                'userReaction' => null,
-                'replies' => []
-            ],
+            'comment' => $this->postService->formatComment($comment, Auth::user()),
         ]);
     }
 
     public function commentReaction(Request $request, Comment $comment): JsonResponse
     {
-        $user = Auth::user();
-        $type = $request->input('type', 'like');
+        $request->validate(['type' => 'required|string']);
 
-        $existingReaction = $comment->reactions()->where('user_id', $user->id)->first();
+        $result = $this->reactionService->toggleReaction(
+            $comment,
+            Auth::user(),
+            $request->input('type')
+        );
 
-        if ($existingReaction) {
-            if ($existingReaction->type === $type) {
-                $existingReaction->delete();
-                $userReaction = null;
-            } else {
-                $existingReaction->update(['type' => $type]);
-                $userReaction = $type;
-            }
-        } else {
-            $comment->reactions()->create([
-                'user_id' => $user->id,
-                'type' => $type
-            ]);
-            $userReaction = $type;
-        }
-
-        $reactions = $comment->reactions()
-            ->select('type')
-            ->selectRaw('count(*) as count')
-            ->groupBy('type')
-            ->get()
-            ->map(function ($reaction) {
-                return [
-                    'type' => $reaction->type,
-                    'count' => $reaction->count
-                ];
-            })->toArray();
-
-        return response()->json([
-            'reactions' => $reactions,
-            'userReaction' => $userReaction,
-        ]);
+        return response()->json($result);
     }
 
     public function commentReply(Request $request, Comment $comment): JsonResponse
     {
-        $request->validate([
-            'content' => 'required|string|max:1000',
-        ]);
+        $request->validate(['content' => 'required|string|max:1000']);
 
         $reply = Comment::create([
             'user_id' => Auth::id(),
@@ -222,17 +96,7 @@ class PostController extends Controller
         $reply->load('user');
 
         return response()->json([
-            'reply' => [
-                'id' => $reply->id,
-                'content' => $reply->content,
-                'user' => [
-                    'name' => $reply->user->name,
-                    'avatar' => $reply->user->avatar ?? 'https://i.pravatar.cc/150?u=' . $reply->user->id,
-                ],
-                'timestamp' => $reply->created_at->diffForHumans(),
-                'reactions' => [],
-                'replies' => [],
-            ],
+            'reply' => $this->postService->formatComment($reply, Auth::user()),
         ]);
     }
 }
