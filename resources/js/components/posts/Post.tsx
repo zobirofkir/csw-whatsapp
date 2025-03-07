@@ -1,5 +1,5 @@
-import { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
+import { useEffect, useRef, useState } from 'react';
 
 interface MediaItem {
     id: number;
@@ -45,7 +45,7 @@ const REACTIONS = {
     haha: '😂',
     wow: '😮',
     sad: '😢',
-    angry: '😠'
+    angry: '😠',
 };
 
 export default function Post({ post }: PostProps) {
@@ -76,12 +76,38 @@ export default function Post({ post }: PostProps) {
 
     const handleReaction = async (type: string) => {
         try {
+            const prevReaction = userReaction;
+            const prevCounts = { ...reactionCounts };
+
+            if (prevReaction === type) {
+                setUserReaction(undefined);
+                setReactionCounts((prev) => ({
+                    ...prev,
+                    [type]: Math.max((prev[type] || 0) - 1, 0),
+                }));
+            } else {
+                if (prevReaction) {
+                    setReactionCounts((prev) => ({
+                        ...prev,
+                        [prevReaction]: Math.max((prev[prevReaction] || 0) - 1, 0),
+                    }));
+                }
+                setUserReaction(type);
+                setReactionCounts((prev) => ({
+                    ...prev,
+                    [type]: (prev[type] || 0) + 1,
+                }));
+            }
+
             const response = await axios.post(`/posts/${post.id}/react`, { type });
+
             setReactionCounts(response.data.reactionCounts);
             setUserReaction(response.data.userReaction);
             setShowReactionPicker(false);
         } catch (error) {
             console.error('Error setting reaction:', error);
+            setReactionCounts(prevCounts);
+            setUserReaction(prevReaction);
         }
     };
 
@@ -92,7 +118,7 @@ export default function Post({ post }: PostProps) {
         setIsSubmitting(true);
         try {
             const response = await axios.post(`/posts/${post.id}/comment`, {
-                content: newComment
+                content: newComment,
             });
             setComments([response.data.comment, ...comments]);
             setNewComment('');
@@ -108,20 +134,14 @@ export default function Post({ post }: PostProps) {
             <div className="p-4">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center">
-                        <img
-                            src={post.user.avatar}
-                            alt={post.user.name}
-                            className="h-10 w-10 rounded-full"
-                        />
+                        <img src={post.user.avatar} alt={post.user.name} className="h-10 w-10 rounded-full" />
                         <div className="ml-2">
-                            <h3 className="text-[15px] font-semibold text-gray-900 hover:underline dark:text-white">
-                                {post.user.name}
-                            </h3>
+                            <h3 className="text-[15px] font-semibold text-gray-900 hover:underline dark:text-white">{post.user.name}</h3>
                             <div className="flex items-center text-[13px] text-gray-500 dark:text-gray-400">
                                 <span>{post.user.timestamp}</span>
                                 <span className="mx-1">·</span>
                                 <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 16 16">
-                                    <path d="M8 0a8 8 0 100 16A8 8 0 008 0zm0 14A6 6 0 118 2a6 6 0 010 12z"/>
+                                    <path d="M8 0a8 8 0 100 16A8 8 0 008 0zm0 14A6 6 0 118 2a6 6 0 010 12z" />
                                 </svg>
                             </div>
                         </div>
@@ -133,9 +153,7 @@ export default function Post({ post }: PostProps) {
                     </button>
                 </div>
 
-                <p className="mt-3 text-[15px] text-gray-900 dark:text-white whitespace-pre-wrap">
-                    {post.content}
-                </p>
+                <p className="mt-3 text-[15px] whitespace-pre-wrap text-gray-900 dark:text-white">{post.content}</p>
             </div>
 
             {post.media && post.media.length > 0 && (
@@ -166,8 +184,8 @@ export default function Post({ post }: PostProps) {
                 <div className="flex items-center justify-between border-b border-gray-100 pb-2 text-[15px] text-gray-500 dark:border-gray-700">
                     <div className="flex items-center -space-x-1">
                         {Object.entries(reactionCounts)
-                            .filter(([_, count]) => count > 0)
-                            .map(([type, count], index) => (
+                            .filter(([reaction, reactionCount]) => reactionCount > 0)
+                            .map(([type], index) => (
                                 <div
                                     key={type}
                                     className={`${index === 0 ? '' : '-ml-1'} h-5 w-5 rounded-full bg-white shadow-sm ring-2 ring-white dark:bg-gray-800`}
@@ -175,39 +193,57 @@ export default function Post({ post }: PostProps) {
                                     {REACTIONS[type as keyof typeof REACTIONS]}
                                 </div>
                             ))}
-                        <span className="ml-2">
-                            {Object.values(reactionCounts).reduce((a, b) => a + b, 0)}
-                        </span>
+                        <span className="ml-2">{Object.values(reactionCounts).reduce((a, b) => a + b, 0)}</span>
                     </div>
-                    <span className="cursor-pointer hover:underline">
-                        {comments.length} comments
-                    </span>
+                    <span className="cursor-pointer hover:underline">{comments.length} comments</span>
                 </div>
             </div>
 
             <div className="px-4 py-1">
                 <div className="flex border-b border-gray-100 dark:border-gray-700">
-                    <button
-                        onClick={() => setShowReactionPicker(!showReactionPicker)}
-                        className={`relative flex flex-1 items-center justify-center space-x-2 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg ${
-                            userReaction ? 'text-blue-500' : 'text-gray-500'
-                        }`}
-                    >
-                        <span className="text-xl">{userReaction ? REACTIONS[userReaction as keyof typeof REACTIONS] : '👍'}</span>
-                        <span className="font-semibold">Like</span>
-                    </button>
+                    <div className="relative">
+                        <button
+                            onClick={() => setShowReactionPicker(!showReactionPicker)}
+                            className={`flex flex-1 items-center justify-center space-x-2 rounded-lg py-2 hover:bg-gray-50 dark:hover:bg-gray-700 ${
+                                userReaction ? 'text-blue-500' : 'text-gray-500'
+                            }`}
+                        >
+                            <span className="text-xl">{userReaction ? REACTIONS[userReaction as keyof typeof REACTIONS] : '👍'}</span>
+                            <span className="font-semibold">Like</span>
+                        </button>
+
+                        {showReactionPicker && (
+                            <div
+                                ref={reactionPickerRef}
+                                className="absolute bottom-full left-0 mb-2 flex space-x-1 rounded-full bg-white p-2 shadow-lg transition-all duration-200 dark:bg-gray-700"
+                            >
+                                {Object.entries(REACTIONS).map(([type, emoji]) => (
+                                    <button
+                                        key={type}
+                                        onClick={() => handleReaction(type)}
+                                        className={`transform cursor-pointer rounded-full p-2 text-2xl transition hover:scale-125 ${
+                                            userReaction === type ? 'scale-110' : ''
+                                        }`}
+                                        title={type}
+                                    >
+                                        {emoji}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                    </div>
                     <button
                         onClick={() => setShowComments(!showComments)}
-                        className="flex flex-1 items-center justify-center space-x-2 py-2 text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg"
+                        className="flex flex-1 items-center justify-center space-x-2 rounded-lg py-2 text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700"
                     >
                         <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
+                            <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z" />
                         </svg>
                         <span className="font-semibold">Comment</span>
                     </button>
-                    <button className="flex flex-1 items-center justify-center space-x-2 py-2 text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg">
+                    <button className="flex flex-1 items-center justify-center space-x-2 rounded-lg py-2 text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700">
                         <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92c0-1.61-1.31-2.92-2.92-2.92zM18 4c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zM6 13c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm12 7.02c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1z"/>
+                            <path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92c0-1.61-1.31-2.92-2.92-2.92zM18 4c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zM6 13c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm12 7.02c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1z" />
                         </svg>
                         <span className="font-semibold">Share</span>
                     </button>
@@ -217,28 +253,20 @@ export default function Post({ post }: PostProps) {
             {showComments && (
                 <div className="px-4 py-2">
                     <form onSubmit={handleComment} className="mb-4 flex items-center space-x-2">
-                        <img
-                            src={post.user.avatar}
-                            alt="Your avatar"
-                            className="h-8 w-8 rounded-full"
-                        />
+                        <img src={post.user.avatar} alt="Your avatar" className="h-8 w-8 rounded-full" />
                         <input
                             type="text"
                             value={newComment}
                             onChange={(e) => setNewComment(e.target.value)}
                             placeholder="Write a comment..."
-                            className="flex-1 rounded-full bg-gray-100 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700"
+                            className="flex-1 rounded-full bg-gray-100 px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-gray-700"
                         />
                     </form>
 
                     <div className="space-y-3">
                         {comments.map((comment) => (
                             <div key={comment.id} className="flex space-x-2">
-                                <img
-                                    src={comment.user.avatar}
-                                    alt={comment.user.name}
-                                    className="h-8 w-8 rounded-full"
-                                />
+                                <img src={comment.user.avatar} alt={comment.user.name} className="h-8 w-8 rounded-full" />
                                 <div>
                                     <div className="rounded-2xl bg-gray-100 px-3 py-2 dark:bg-gray-700">
                                         <p className="text-sm font-semibold">{comment.user.name}</p>
@@ -253,26 +281,6 @@ export default function Post({ post }: PostProps) {
                             </div>
                         ))}
                     </div>
-                </div>
-            )}
-
-            {showReactionPicker && (
-                <div
-                    ref={reactionPickerRef}
-                    className="absolute -top-12 left-0 flex space-x-1 rounded-full bg-white p-2 shadow-lg transition-all duration-200 dark:bg-gray-700"
-                >
-                    {Object.entries(REACTIONS).map(([type, emoji]) => (
-                        <button
-                            key={type}
-                            onClick={() => handleReaction(type)}
-                            className={`transform cursor-pointer rounded-full p-2 text-2xl transition hover:scale-125 ${
-                                userReaction === type ? 'scale-110' : ''
-                            }`}
-                            title={type}
-                        >
-                            {emoji}
-                        </button>
-                    ))}
                 </div>
             )}
         </div>

@@ -90,10 +90,10 @@ class PostController extends Controller
     {
         $user = auth()->user();
         $post = Post::findOrFail($postId);
-        $type = $request->input('type', 'like');
+        $type = $request->input('type');
 
-        if (!array_key_exists($type, Reaction::$types)) {
-            return response()->json(['message' => 'Invalid reaction type'], 400);
+        if (!$type) {
+            return response()->json(['message' => 'Reaction type is required'], 400);
         }
 
         $existingReaction = $post->reactions()->where('user_id', $user->id)->first();
