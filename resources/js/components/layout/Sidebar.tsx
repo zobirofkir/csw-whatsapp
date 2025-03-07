@@ -7,6 +7,8 @@ import GroupsLink from './sidebar/GroupsLink';
 import MarketplaceLink from './sidebar/MarketplaceLink';
 import ProfileLink from './sidebar/ProfileLink';
 import WatchLink from './sidebar/WatchLink';
+import NotificationsLink from './sidebar/NotificationsLink';
+import MessagesLink from './sidebar/MessagesLink';
 
 interface SidebarProps {
     isMobile: boolean;
@@ -53,6 +55,12 @@ export default function Sidebar({ isMobile, showMobileMenu }: SidebarProps) {
                     </SidebarLink>
                     <SidebarLink href="/gaming">
                         <GamingLink />
+                    </SidebarLink>
+                    <SidebarLink href="/notifications">
+                        <NotificationsLink count={3} />
+                    </SidebarLink>
+                    <SidebarLink href="/messages">
+                        <MessagesLink count={5} />
                     </SidebarLink>
                 </div>
             </div>
