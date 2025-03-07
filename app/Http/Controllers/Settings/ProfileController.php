@@ -3,16 +3,21 @@
 namespace App\Http\Controllers\Settings;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\UpdateProfileRequest;
 use App\Models\User;
+use App\Services\AvatarService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
 use Laravel\WorkOS\Http\Requests\AuthKitAccountDeletionRequest;
 
 class ProfileController extends Controller
 {
+    public function __construct(
+        private readonly AvatarService $avatarService
+    ) {}
+
     /**
      * Show the user's profile settings page.
      */
@@ -26,25 +31,15 @@ class ProfileController extends Controller
     /**
      * Update the user's profile settings.
      */
-    public function update(Request $request): RedirectResponse
+    public function update(UpdateProfileRequest $request): RedirectResponse
     {
-        $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'avatar' => ['nullable', 'image', 'max:1024'], // Max 1MB
-        ]);
-
-        $userData = [
-            'name' => $request->name,
-        ];
+        $userData = ['name' => $request->validated('name')];
 
         if ($request->hasFile('avatar')) {
-            // Delete old avatar if it's a local file (not a WorkOS URL)
-            if ($request->user()->avatar && !str_contains($request->user()->avatar, 'workoscdn.com')) {
-                Storage::disk('public')->delete($request->user()->avatar);
-            }
-
-            // Store new avatar
-            $userData['avatar'] = $request->file('avatar')->store('avatars', 'public');
+            $userData['avatar'] = $this->avatarService->updateAvatar(
+                user: $request->user(),
+                newAvatar: $request->file('avatar')
+            );
         }
 
         $request->user()->update($userData);
