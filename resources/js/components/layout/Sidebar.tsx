@@ -9,6 +9,7 @@ import MessagesLink from './sidebar/MessagesLink';
 import NotificationsLink from './sidebar/NotificationsLink';
 import ProfileLink from './sidebar/ProfileLink';
 import WatchLink from './sidebar/WatchLink';
+import { FaSignOutAlt } from 'react-icons/fa';
 
 interface SidebarProps {
     isMobile: boolean;
@@ -73,6 +74,12 @@ export default function Sidebar({ isMobile, showMobileMenu, setShowMobileMenu }:
                         </SidebarLink>
                         <SidebarLink href="/messages">
                             <MessagesLink count={5} />
+                        </SidebarLink>
+                        <SidebarLink href="/logout">
+                            <div className='flex items-center gap-2'>
+                                <FaSignOutAlt />
+                                <span>Logout</span>
+                            </div>
                         </SidebarLink>
                     </div>
                 </div>
