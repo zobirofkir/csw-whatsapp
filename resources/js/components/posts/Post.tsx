@@ -1,3 +1,9 @@
+interface MediaItem {
+    id: number;
+    url: string;
+    type: 'image' | 'video';
+}
+
 interface PostProps {
     post: {
         id: number;
@@ -7,7 +13,7 @@ interface PostProps {
             timestamp: string;
         };
         content: string;
-        image: string;
+        media: MediaItem[];
         likes: number;
         comments: number;
     };
@@ -40,9 +46,27 @@ export default function Post({ post }: PostProps) {
                 <p className="mt-3 text-[15px] text-black dark:text-white">{post.content}</p>
             </div>
 
-            {post.image && (
+            {post.media && post.media.length > 0 && (
                 <div className="border-t border-b border-gray-200 dark:border-gray-700">
-                    <img src={post.image} alt="Post content" className="w-full" />
+                    {post.media.map((media) => (
+                        <div key={media.id}>
+                            {media.type === 'image' ? (
+                                <img
+                                    src={media.url}
+                                    alt="Post content"
+                                    className="w-full"
+                                />
+                            ) : (
+                                <video
+                                    controls
+                                    className="w-full"
+                                >
+                                    <source src={media.url} type="video/mp4" />
+                                    Your browser does not support the video tag.
+                                </video>
+                            )}
+                        </div>
+                    ))}
                 </div>
             )}
 

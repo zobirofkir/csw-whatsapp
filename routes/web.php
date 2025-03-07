@@ -10,6 +10,7 @@ Route::get('/', [PageController::class, 'welcome'])->name('home');
 Route::controller(PageController::class)->middleware([ 'auth',ValidateSessionWithWorkOS::class ])->group(function () {
     Route::get('/account/auth/{username}', 'accountAuth')->name('account.auth');
     Route::post('/posts', [PostController::class, 'store'])->name('posts.store');
+    Route::get('/posts', [PostController::class, 'index'])->name('posts.index');
 });
 
 require __DIR__.'/settings.php';

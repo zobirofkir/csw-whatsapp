@@ -3,6 +3,7 @@ import { type SharedData } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
+import PostList from '../components/posts/PostList';
 
 export default function Welcome() {
     const { auth } = usePage<SharedData>().props;
@@ -375,6 +376,12 @@ export default function Welcome() {
                         </div>
                     </div>
                 </footer>
+            </div>
+
+            <div className="container mx-auto px-4 py-8">
+                <div className="max-w-2xl mx-auto">
+                    <PostList />
+                </div>
             </div>
         </>
     );
