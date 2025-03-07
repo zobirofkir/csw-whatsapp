@@ -1,7 +1,8 @@
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { type BreadcrumbItem, type SharedData } from '@/types';
 import { Transition } from '@headlessui/react';
 import { Head, useForm, usePage } from '@inertiajs/react';
-import { FormEventHandler } from 'react';
+import { FormEventHandler, useRef } from 'react';
 
 import DeleteUser from '@/components/delete-user';
 import InputError from '@/components/input-error';
@@ -18,25 +19,42 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-interface ProfileForm {
+interface ProfileForm extends Record<string, any> {
     name: string;
-    email: string;
+    avatar: File | null;
+    _method: string;
 }
 
 export default function Profile() {
     const { auth } = usePage<SharedData>().props;
+    const fileInput = useRef<HTMLInputElement>(null);
 
-    const { data, setData, patch, errors, processing, recentlySuccessful } = useForm<Required<ProfileForm>>({
+    const { data, setData, post, errors, processing, recentlySuccessful } = useForm<ProfileForm>({
         name: auth.user.name,
-        email: auth.user.email,
+        avatar: null,
+        _method: 'patch',
     });
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
 
-        patch(route('profile.update'), {
+        const formData = new FormData();
+        formData.append('_method', 'PATCH');
+        formData.append('name', data.name);
+        if (data.avatar) {
+            formData.append('avatar', data.avatar);
+        }
+
+        post(route('profile.update'), {
             preserveScroll: true,
+            forceFormData: true,
         });
+    };
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files?.[0]) {
+            setData('avatar', e.target.files[0]);
+        }
     };
 
     return (
@@ -55,6 +73,31 @@ export default function Profile() {
                                 </p>
 
                                 <form onSubmit={submit} className="mt-6 space-y-6">
+                                    {/* Avatar Section */}
+                                    <div className="flex items-center gap-4">
+                                        <Avatar className="h-20 w-20">
+                                            <AvatarImage
+                                                src={
+                                                    data.avatar
+                                                        ? URL.createObjectURL(data.avatar)
+                                                        : auth.user.avatar?.startsWith('http')
+                                                          ? auth.user.avatar
+                                                          : auth.user.avatar
+                                                            ? `/storage/${auth.user.avatar}`
+                                                            : undefined
+                                                }
+                                            />
+                                            <AvatarFallback>{auth.user.name.charAt(0)}</AvatarFallback>
+                                        </Avatar>
+                                        <div className="flex-1">
+                                            <input type="file" ref={fileInput} className="hidden" onChange={handleFileChange} accept="image/*" />
+                                            <Button type="button" variant="outline" onClick={() => fileInput.current?.click()}>
+                                                Change Avatar
+                                            </Button>
+                                            {errors.avatar && <InputError message={errors.avatar} className="mt-2" />}
+                                        </div>
+                                    </div>
+
                                     <div>
                                         <Label htmlFor="name" className="text-sm font-medium text-gray-700 dark:text-gray-300">
                                             Name
@@ -68,24 +111,6 @@ export default function Profile() {
                                             autoComplete="name"
                                         />
                                         <InputError message={errors.name} className="mt-2" />
-                                    </div>
-
-                                    <div>
-                                        <Label htmlFor="email" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                                            Email
-                                        </Label>
-                                        <div className="mt-1 flex rounded-md shadow-sm">
-                                            <Input
-                                                id="email"
-                                                type="email"
-                                                className="block w-full rounded-md border-gray-300 bg-gray-50 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
-                                                value={data.email}
-                                                onChange={(e) => setData('email', e.target.value)}
-                                                required
-                                                autoComplete="username"
-                                            />
-                                        </div>
-                                        <InputError message={errors.email} className="mt-2" />
                                     </div>
 
                                     <div className="flex items-center gap-4">

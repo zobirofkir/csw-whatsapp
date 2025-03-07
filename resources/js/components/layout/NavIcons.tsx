@@ -53,7 +53,11 @@ export default function NavIcons({
                         className="relative flex h-8 w-8 items-center justify-center rounded-full bg-gray-200 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                     >
                         <img
-                            src={auth?.user?.avatar}
+                            src={auth?.user?.avatar?.startsWith('http')
+                                ? auth.user.avatar
+                                : auth.user.avatar
+                                    ? `/storage/${auth.user.avatar}`
+                                    : undefined}
                             alt={auth?.user?.name}
                             className="h-8 w-8 rounded-full object-cover"
                         />
