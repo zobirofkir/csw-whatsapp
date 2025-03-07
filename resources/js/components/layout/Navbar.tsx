@@ -1,6 +1,7 @@
 import { Link } from '@inertiajs/react';
-import NavIcons from './NavIcons';
 import { useState } from 'react';
+import { FaBookmark, FaCog, FaHeart, FaSignOutAlt, FaUser } from 'react-icons/fa';
+import NavIcons from './NavIcons';
 
 interface NavbarProps {
     darkMode: boolean;
@@ -46,19 +47,43 @@ export default function Navbar({ darkMode, toggleDarkMode, isMobile, showMobileM
 
                         {/* Profile Dropdown Menu */}
                         {showProfileMenu && (
-                            <div className="absolute right-0 mt-2 w-48 rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 dark:bg-gray-700">
+                            <div className="ring-opacity-5 absolute right-0 mt-2 w-48 rounded-md bg-white py-1 shadow-lg ring-1 ring-black dark:bg-gray-700">
                                 <Link
                                     href="/settings/profile"
-                                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-600"
+                                    className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-600"
                                 >
+                                    <FaUser className="mr-3" />
                                     Your Profile
                                 </Link>
+                                <Link
+                                    href="/settings"
+                                    className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-600"
+                                >
+                                    <FaCog className="mr-3" />
+                                    Settings
+                                </Link>
+                                <Link
+                                    href="/saved-posts"
+                                    className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-600"
+                                >
+                                    <FaBookmark className="mr-3" />
+                                    Saved Posts
+                                </Link>
+                                <Link
+                                    href="/liked-posts"
+                                    className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-600"
+                                >
+                                    <FaHeart className="mr-3" />
+                                    Liked Posts
+                                </Link>
+                                <div className="my-1 border-t border-gray-200 dark:border-gray-600"></div>
                                 <Link
                                     href="/logout"
                                     method="post"
                                     as="button"
-                                    className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-600"
+                                    className="flex w-full items-center px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-600"
                                 >
+                                    <FaSignOutAlt className="mr-3" />
                                     Logout
                                 </Link>
                             </div>
