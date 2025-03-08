@@ -10,7 +10,7 @@ export default function Account() {
         <AppLayout>
             <Head title={auth?.user?.name} />
 
-            <div className="space-y-4 py-4">
+            <div className="space-y-6">
                 <StoriesContainer />
                 <CreatePostForm />
                 <PostList />

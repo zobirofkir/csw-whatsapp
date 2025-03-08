@@ -31,11 +31,11 @@ export default function Sidebar({ isMobile, showMobileMenu, setShowMobileMenu }:
             {/* Mobile Sidebar */}
             {isMobile && (
                 <div
-                    className={`fixed inset-y-0 left-0 z-50 w-[280px] transform overflow-y-auto bg-white transition-transform duration-300 ease-in-out dark:bg-[#242526] ${
+                    className={`fixed inset-y-0 left-0 z-50 w-[360px] transform overflow-y-auto bg-white transition-transform duration-300 ease-in-out dark:bg-[#242526] ${
                         showMobileMenu ? 'translate-x-0' : '-translate-x-full'
                     }`}
                 >
-                    <div className="space-y-1 px-3">
+                    <div className="space-y-0.5 p-2">
                         <SidebarLink href="/settings/profile">
                             <ProfileLink />
                         </SidebarLink>
@@ -74,8 +74,8 @@ export default function Sidebar({ isMobile, showMobileMenu, setShowMobileMenu }:
             )}
 
             {/* Desktop Sidebar */}
-            <div className="sticky top-16 hidden h-[calc(100vh-4rem)] w-[280px] overflow-y-auto px-2 pt-4 lg:block">
-                <nav className="space-y-1">
+            <div className="sticky top-16 hidden h-[calc(100vh-4rem)] w-[360px] overflow-y-auto pt-2 pr-2 pl-4 lg:block">
+                <nav className="space-y-0.5">
                     <SidebarLink href="/settings/profile">
                         <ProfileLink />
                     </SidebarLink>
@@ -119,7 +119,7 @@ function SidebarLink({
             href={href}
             method={method}
             as={as}
-            className="flex items-center rounded-lg p-2 font-medium text-[#65676B] transition-colors hover:bg-[#F2F2F2] active:bg-[#E4E6E9] dark:text-[#B0B3B8] dark:hover:bg-[#3A3B3C] dark:active:bg-[#4E4F50]"
+            className="flex items-center rounded-lg p-3 font-medium text-[#050505] transition-colors hover:bg-[#F2F2F2] active:bg-[#E4E6E9] dark:text-[#E4E6EB] dark:hover:bg-[#3A3B3C] dark:active:bg-[#4E4F50]"
         >
             {children}
         </Link>

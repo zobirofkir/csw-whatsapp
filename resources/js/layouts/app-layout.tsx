@@ -62,7 +62,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
             </Suspense>
 
             <div className="pt-16">
-                <div className="mx-auto flex max-w-[1920px] justify-between px-0">
+                <div className="mx-auto flex max-w-[1920px] justify-between gap-8 px-0">
                     <Suspense fallback={<LoadingFallback />}>
                         <Sidebar
                             isMobile={isMobile}
@@ -70,7 +70,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
                             setShowMobileMenu={setShowMobileMenu}
                         />
                     </Suspense>
-                    <main className="mx-auto w-full max-w-[680px] px-4 py-4">
+                    <main className="mx-auto w-full max-w-[744px] py-4">
                         {children}
                     </main>
                     <Suspense fallback={<LoadingFallback />}>
