@@ -74,6 +74,7 @@ class PostService
             'likes' => array_sum($reactionCounts),
             'hasReacted' => (bool) $post->reactions()->where('user_id', $user->id)->exists(),
             'comments' => $post->comments->map(fn ($comment) => $this->formatComment($comment, $user)),
+            'created_at' => $post->created_at,
         ];
     }
 

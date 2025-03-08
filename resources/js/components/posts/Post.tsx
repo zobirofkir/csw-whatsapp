@@ -19,7 +19,28 @@ declare global {
     }
 }
 
-// Update PostProps interface to include user_id
+// Add MediaItem type
+interface MediaItem {
+    id: number;
+    type: 'image' | 'video';
+    url: string;
+}
+
+// Add Comment type
+interface Comment {
+    id: number;
+    content: string;
+    user: {
+        name: string;
+        avatar: string;
+    };
+    timestamp: string;
+    reactions: Array<{ type: string; count: number }>;
+    userReaction?: string;
+    replies: Comment[];
+}
+
+// Update PostProps interface
 interface PostProps {
     post: {
         id: number;
@@ -36,7 +57,35 @@ interface PostProps {
         userReaction?: string;
         reactionCounts: ReactionCounts;
         comments: Comment[];
+        created_at: string;
     };
+}
+
+function formatTimestamp(timestamp: string): string {
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diff = now.getTime() - date.getTime();
+
+    const seconds = Math.floor(diff / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
+    const months = Math.floor(days / 30);
+    const years = Math.floor(days / 365);
+
+    if (years > 0) {
+        return `${years}y`;
+    } else if (months > 0) {
+        return `${months}mo`;
+    } else if (days > 0) {
+        return `${days}d`;
+    } else if (hours > 0) {
+        return `${hours}h`;
+    } else if (minutes > 0) {
+        return `${minutes}m`;
+    } else {
+        return 'Just now';
+    }
 }
 
 export default function Post({ post }: PostProps) {
@@ -341,7 +390,7 @@ export default function Post({ post }: PostProps) {
                                 {post.user.name}
                             </h3>
                             <div className="flex items-center text-[13px] text-[#65676B] dark:text-gray-400">
-                                <span>{post.user.timestamp}</span>
+                                <span>{formatTimestamp(post.created_at)}</span>
                                 <span className="mx-1">·</span>
                                 <svg className="h-3.5 w-3.5 fill-current" viewBox="0 0 16 16">
                                     <path d="M8 0a8 8 0 100 16A8 8 0 008 0zm0 14A6 6 0 118 2a6 6 0 010 12z" />
