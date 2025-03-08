@@ -29,7 +29,7 @@ export function Comment({
 }: CommentProps) {
     return (
         <div className={`flex space-x-2 ${isReply ? 'mt-2 ml-8' : ''} animate-fadeIn`}>
-            <img src={comment.user.avatar ? `/storage/${comment.user.avatar}` : undefined} alt={comment.user.name} className="h-8 w-8 rounded-full" />
+            <img src={comment.user.avatar?.startsWith('http') ? comment.user.avatar : comment.user.avatar ? `/storage/${comment.user.avatar}` : undefined} alt={comment.user.name} className="h-8 w-8 rounded-full" />
             <div className="flex-1">
                 <div className="rounded-2xl bg-gray-100 px-3 py-2 dark:bg-gray-700">
                     <p className="text-sm font-semibold">{comment.user.name}</p>
