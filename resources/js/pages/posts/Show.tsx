@@ -1,29 +1,37 @@
-import { Post as PostType } from '@/types';
 import Post from '@/components/posts/Post';
-import { Head } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
+import { Post as PostType } from '@/types';
+import { Head, usePage } from '@inertiajs/react';
 
 interface Props {
     post: PostType;
 }
 
 export default function Show({ post }: Props) {
+    const {auth} = usePage().props;
     return (
         <section>
             <Head title={`Post by ${post.user.name}`} />
 
-            <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 overflow-y-auto">
-                <div className="relative max-w-2xl w-full animate-fadeIn">
-                    <a
-                        href="/"
-                        className="absolute -top-12 left-0 text-white hover:text-gray-200 flex items-center gap-2"
-                    >
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                        </svg>
-                        Back to Feed
-                    </a>
-                    <Post post={post} />
+            <div className="fixed inset-0 flex items-center justify-center overflow-y-auto bg-[#F0F2F5] dark:bg-[#1C1E21]">
+                {/* Modal Container */}
+                <div className="animate-fadeIn relative my-0 min-h-screen w-full max-w-[680px] bg-white shadow-xl md:my-8 md:min-h-0 md:rounded-lg dark:bg-[#242526]">
+                    {/* Header */}
+                    <div className="flex items-center justify-between border-b border-gray-200 p-4 dark:border-gray-700">
+                        <h2 className="text-xl font-bold text-[#050505] dark:text-white">{post.user.name}'s Post</h2>
+                        <a
+                            href={auth?.user ? `/account/auth/${auth.user.name}` : '/'}
+                            className="flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-gray-100 dark:hover:bg-gray-600"
+                        >
+                            <svg className="h-6 w-6 text-gray-500 dark:text-gray-300" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M18.984 6.422L13.406 12l5.578 5.578-1.406 1.406L12 13.406l-5.578 5.578-1.406-1.406L10.594 12 5.016 6.422l1.406-1.406L12 10.594l5.578-5.578z" />
+                            </svg>
+                        </a>
+                    </div>
+
+                    {/* Post Content */}
+                    <div className="p-4">
+                        <Post post={post} />
+                    </div>
                 </div>
             </div>
         </section>
