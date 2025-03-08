@@ -43,7 +43,6 @@ export default function ProfileLayout({ children }: ProfileLayoutProps) {
             <Navbar
                 darkMode={darkMode}
                 toggleDarkMode={toggleDarkMode}
-                isMobile={isMobile}
                 showMobileMenu={showMobileMenu}
                 setShowMobileMenu={setShowMobileMenu}
             />
