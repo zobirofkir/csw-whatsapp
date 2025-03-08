@@ -151,4 +151,20 @@ class PostService
             ]);
         }
     }
+
+    /**
+     * Get formatted posts for a specific user
+     *
+     * @param User $user The user whose posts to retrieve
+     * @return array Collection of formatted posts
+     */
+    public function getFormattedUserPosts(User $user): array
+    {
+        return Post::with(['user', 'media', 'reactions', 'comments.user', 'comments.reactions'])
+            ->where('user_id', $user->id)
+            ->latest()
+            ->get()
+            ->map(fn ($post) => $this->formatPost($post, $user))
+            ->toArray();
+    }
 }

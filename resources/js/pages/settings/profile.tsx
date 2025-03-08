@@ -1,33 +1,35 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { type BreadcrumbItem, type SharedData } from '@/types';
-import { Transition } from '@headlessui/react';
+import { type BreadcrumbItem, type PostType, type SharedData } from '@/types';
 import { Head, useForm, usePage } from '@inertiajs/react';
 import { FormEventHandler, useRef } from 'react';
 
-import DeleteUser from '@/components/delete-user';
-import InputError from '@/components/input-error';
+import CreatePostForm from '@/components/posts/CreatePostForm';
+import Post from '@/components/posts/Post';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import SettingsLayout from '@/layouts/settings/layout';
 import ProfileLayout from '@/layouts/settings/profile-layout';
-import CreatePostForm from '@/components/posts/CreatePostForm';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Profile settings',
+        title: 'Profile',
         href: '/settings/profile',
     },
 ];
 
-interface ProfileForm extends Record<string, any> {
+interface ProfileForm {
+    name: string;
+    avatar: File | null;
+    _method: string;
+}
+
+interface ProfileFormData {
     name: string;
     avatar: File | null;
     _method: string;
 }
 
 export default function Profile() {
-    const { auth } = usePage<SharedData>().props;
+    const { auth, userPosts } = usePage<SharedData & { userPosts: PostType[] }>().props;
     const fileInput = useRef<HTMLInputElement>(null);
 
     const { data, setData, post, errors, processing, recentlySuccessful } = useForm<ProfileForm>({
@@ -60,95 +62,147 @@ export default function Profile() {
 
     return (
         <ProfileLayout breadcrumbs={breadcrumbs}>
-            <Head title="Profile settings" />
+            <Head title="Profile" />
 
             <SettingsLayout>
-                <div className="mx-auto max-w-3xl">
-                    <div className="space-y-6">
-                        {/* Add CreatePostForm at the top */}
-                        <CreatePostForm />
+                {/* Cover Photo Section */}
+                <div className="relative h-[350px] w-full overflow-hidden rounded-b-xl bg-gray-200 dark:bg-gray-700">
+                    <img src={auth.user.cover_photo || '/images/default-cover.jpg'} alt="Cover" className="h-full w-full object-cover" />
+                    <Button
+                        variant="secondary"
+                        className="absolute right-4 bottom-4 bg-white/90 dark:bg-gray-800/90"
+                        onClick={() => fileInput.current?.click()}
+                    >
+                        <i className="fas fa-camera mr-2" />
+                        Edit Cover Photo
+                    </Button>
+                </div>
 
-                        {/* Profile Information Card */}
-                        <div className="rounded-xl bg-white shadow-sm dark:bg-gray-800">
-                            <div className="p-6">
-                                <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Profile Information</h2>
-                                <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                                    Update your account's profile information and email address.
-                                </p>
+                {/* Profile Header Section */}
+                <div className="relative mx-auto max-w-5xl px-4">
+                    <div className="-mt-[96px] flex flex-col items-center sm:flex-row sm:items-end sm:space-x-5">
+                        <Avatar className="h-[168px] w-[168px] ring-4 ring-white dark:ring-gray-800">
+                            <AvatarImage
+                                src={
+                                    data.avatar
+                                        ? URL.createObjectURL(data.avatar)
+                                        : auth.user.avatar?.startsWith('http')
+                                          ? auth.user.avatar
+                                          : auth.user.avatar
+                                            ? `/storage/${auth.user.avatar}`
+                                            : undefined
+                                }
+                            />
+                            <AvatarFallback>{auth.user.name.charAt(0)}</AvatarFallback>
+                            <Button
+                                variant="secondary"
+                                className="absolute right-4 bottom-4 h-8 w-8 rounded-full bg-gray-200 p-0 hover:bg-gray-300 dark:bg-gray-700"
+                                onClick={() => fileInput.current?.click()}
+                            >
+                                <i className="fas fa-camera" />
+                            </Button>
+                        </Avatar>
 
-                                <form onSubmit={submit} className="mt-6 space-y-6">
-                                    {/* Avatar Section */}
-                                    <div className="flex items-center gap-4">
-                                        <Avatar className="h-20 w-20">
-                                            <AvatarImage
-                                                src={
-                                                    data.avatar
-                                                        ? URL.createObjectURL(data.avatar)
-                                                        : auth.user.avatar?.startsWith('http')
-                                                          ? auth.user.avatar
-                                                          : auth.user.avatar
-                                                            ? `/storage/${auth.user.avatar}`
-                                                            : undefined
-                                                }
-                                            />
-                                            <AvatarFallback>{auth.user.name.charAt(0)}</AvatarFallback>
-                                        </Avatar>
-                                        <div className="flex-1">
-                                            <input type="file" ref={fileInput} className="hidden" onChange={handleFileChange} accept="image/*" />
-                                            <Button type="button" variant="outline" onClick={() => fileInput.current?.click()}>
-                                                Change Avatar
-                                            </Button>
-                                            {errors.avatar && <InputError message={errors.avatar} className="mt-2" />}
-                                        </div>
-                                    </div>
+                        <div className="mt-6 flex-1 sm:mt-0">
+                            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{auth.user.name}</h1>
+                            <p className="text-gray-500 dark:text-gray-400">500 friends</p>
+                        </div>
 
-                                    <div>
-                                        <Label htmlFor="name" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                                            Name
-                                        </Label>
-                                        <Input
-                                            id="name"
-                                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
-                                            value={data.name}
-                                            onChange={(e) => setData('name', e.target.value)}
-                                            required
-                                            autoComplete="name"
-                                        />
-                                        <InputError message={errors.name} className="mt-2" />
-                                    </div>
+                        <div className="mt-6 flex space-x-3 sm:mt-0">
+                            <Button variant="default" className="flex items-center">
+                                <i className="fas fa-plus mr-2" />
+                                Add to Story
+                            </Button>
+                            <Button variant="default" className="flex items-center">
+                                <i className="fas fa-pen mr-2" />
+                                Edit Profile
+                            </Button>
+                        </div>
+                    </div>
 
-                                    <div className="flex items-center gap-4">
-                                        <Button
-                                            disabled={processing}
-                                            className="inline-flex items-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-xs font-semibold tracking-widest text-white uppercase transition duration-150 ease-in-out hover:bg-blue-700 focus:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none active:bg-blue-900 disabled:opacity-50"
-                                        >
-                                            Save Changes
-                                        </Button>
+                    {/* Navigation Tabs */}
+                    <div className="mt-6 border-b border-gray-200 dark:border-gray-700">
+                        <nav className="-mb-px flex space-x-8">
+                            <a href="#" className="border-b-2 border-blue-500 px-1 py-4 text-sm font-medium whitespace-nowrap text-blue-600">
+                                Posts
+                            </a>
+                            <a href="#" className="px-1 py-4 text-sm font-medium whitespace-nowrap text-gray-500 hover:text-gray-700">
+                                About
+                            </a>
+                            <a href="#" className="px-1 py-4 text-sm font-medium whitespace-nowrap text-gray-500 hover:text-gray-700">
+                                Friends
+                            </a>
+                            <a href="#" className="px-1 py-4 text-sm font-medium whitespace-nowrap text-gray-500 hover:text-gray-700">
+                                Photos
+                            </a>
+                            <a href="#" className="px-1 py-4 text-sm font-medium whitespace-nowrap text-gray-500 hover:text-gray-700">
+                                Videos
+                            </a>
+                        </nav>
+                    </div>
 
-                                        <Transition
-                                            show={recentlySuccessful}
-                                            enter="transition ease-in-out duration-300"
-                                            enterFrom="opacity-0"
-                                            leave="transition ease-in-out duration-300"
-                                            leaveTo="opacity-0"
-                                        >
-                                            <p className="text-sm text-green-600 dark:text-green-400">Saved successfully.</p>
-                                        </Transition>
-                                    </div>
-                                </form>
+                    {/* Main Content Area */}
+                    <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
+                        {/* Left Sidebar */}
+                        <div className="space-y-6">
+                            <div className="rounded-xl bg-white p-4 shadow-sm dark:bg-gray-800">
+                                <h2 className="text-xl font-semibold">Intro</h2>
+                                <div className="mt-4 space-y-4">
+                                    <Button variant="outline" className="w-full">
+                                        Add Bio
+                                    </Button>
+                                    <Button variant="outline" className="w-full">
+                                        Add Hobbies
+                                    </Button>
+                                    <Button variant="outline" className="w-full">
+                                        Add Featured
+                                    </Button>
+                                </div>
+                            </div>
+
+                            {/* Photos Section */}
+                            <div className="rounded-xl bg-white p-4 shadow-sm dark:bg-gray-800">
+                                <div className="flex items-center justify-between">
+                                    <h2 className="text-xl font-semibold">Photos</h2>
+                                    <a href="#" className="text-sm text-blue-600">
+                                        See All Photos
+                                    </a>
+                                </div>
+                                <div className="mt-4 grid grid-cols-3 gap-2">{/* Add photo grid here */}</div>
                             </div>
                         </div>
 
-                        {/* Delete Account Card */}
-                        <div className="rounded-xl bg-white shadow-sm dark:bg-gray-800">
-                            <div className="p-6">
-                                <h2 className="text-xl font-semibold text-red-600 dark:text-red-400">Delete Account</h2>
-                                <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                                    Once your account is deleted, all of its resources and data will be permanently deleted.
-                                </p>
-                                <div className="mt-6">
-                                    <DeleteUser />
-                                </div>
+                        {/* Main Content - Posts */}
+                        <div className="space-y-6 lg:col-span-2">
+                            <CreatePostForm />
+
+                            {/* Posts List */}
+                            <div className="space-y-6">
+                                {userPosts.length > 0 ? (
+                                    userPosts.map((post) => (
+                                        <Post
+                                            key={post.id}
+                                            post={{
+                                                ...post,
+                                                user: {
+                                                    ...post.user,
+                                                    timestamp: post.created_at || 'Just now',
+                                                },
+                                                hasReacted: !!post.user_reaction,
+                                                userReaction: post.user_reaction,
+                                                reactionCounts: post.reaction_counts || {},
+                                                comments: post.comments.map((comment) => ({
+                                                    ...comment,
+                                                    reactions: comment.reactions || [],
+                                                    replies: comment.replies || [],
+                                                    timestamp: comment.created_at || 'Just now',
+                                                })),
+                                            }}
+                                        />
+                                    ))
+                                ) : (
+                                    <p className="text-center text-gray-500 dark:text-gray-400">No posts yet</p>
+                                )}
                             </div>
                         </div>
                     </div>

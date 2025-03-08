@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 use Laravel\WorkOS\Http\Requests\AuthKitAccountDeletionRequest;
+use App\Services\PostService;
 
 class ProfileController extends Controller
 {
@@ -23,8 +24,13 @@ class ProfileController extends Controller
      */
     public function edit(Request $request): Response
     {
+        // Get the authenticated user's posts using the PostService
+        $postService = app(PostService::class);
+        $userPosts = $postService->getFormattedUserPosts($request->user());
+
         return Inertia::render('settings/profile', [
             'status' => $request->session()->get('status'),
+            'userPosts' => $userPosts,
         ]);
     }
 
