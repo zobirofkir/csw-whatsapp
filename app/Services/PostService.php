@@ -7,8 +7,18 @@ use App\Models\Post;
 use App\Models\User;
 use Illuminate\Support\Facades\Storage;
 
+/**
+ * Service class for handling Post-related operations
+ */
 class PostService
 {
+    /**
+     * Create a new post with optional media attachments
+     *
+     * @param PostDTO $postDTO Data transfer object containing post details
+     * @param User $user The user creating the post
+     * @return Post The created post with loaded relationships
+     */
     public function createPost(PostDTO $postDTO, User $user): Post
     {
         $post = $user->posts()->create([
@@ -24,6 +34,12 @@ class PostService
         return $post->load(['user', 'media']);
     }
 
+    /**
+     * Get formatted posts with all related data
+     *
+     * @param User $currentUser The user viewing the posts
+     * @return array Collection of formatted posts
+     */
     public function getFormattedPosts(User $currentUser)
     {
         return Post::with(['user', 'media', 'reactions', 'comments.user', 'comments.reactions'])
@@ -32,6 +48,13 @@ class PostService
             ->map(fn ($post) => $this->formatPost($post, $currentUser));
     }
 
+    /**
+     * Format a single post with all its related data
+     *
+     * @param Post $post The post to format
+     * @param User $user The user viewing the post
+     * @return array Formatted post data
+     */
     public function formatPost(Post $post, User $user): array
     {
         $reactionCounts = $post->reactions()
@@ -54,6 +77,12 @@ class PostService
         ];
     }
 
+    /**
+     * Format user data for response
+     *
+     * @param User $user The user to format
+     * @return array Formatted user data
+     */
     private function formatUser($user): array
     {
         return [
@@ -62,6 +91,12 @@ class PostService
         ];
     }
 
+    /**
+     * Format media data for response
+     *
+     * @param mixed $media The media to format
+     * @return array Formatted media data
+     */
     private function formatMedia($media): array
     {
         return [
@@ -71,6 +106,13 @@ class PostService
         ];
     }
 
+    /**
+     * Format comment data with reactions and replies
+     *
+     * @param mixed $comment The comment to format
+     * @param User $user The user viewing the comment
+     * @return array Formatted comment data
+     */
     public function formatComment($comment, User $user): array
     {
         return [
@@ -88,6 +130,13 @@ class PostService
         ];
     }
 
+    /**
+     * Handle media file uploads for a post
+     *
+     * @param Post $post The post to attach media to
+     * @param array $mediaItems Array of media items to upload
+     * @return void
+     */
     private function handleMediaUploads(Post $post, array $mediaItems): void
     {
         foreach ($mediaItems as $media) {
