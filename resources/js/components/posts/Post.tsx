@@ -1,64 +1,12 @@
 import { router } from '@inertiajs/react';
 import axios from 'axios';
 import { useEffect, useRef, useState } from 'react';
-
-interface MediaItem {
-    id: number;
-    url: string;
-    type: 'image' | 'video';
-}
-
-interface Comment {
-    id: number;
-    content: string;
-    user: {
-        name: string;
-        avatar: string;
-    };
-    timestamp: string;
-    reactions: {
-        type: string;
-        count: number;
-    }[];
-    userReaction?: string;
-    replies: Comment[];
-    parent_id?: number;
-}
-
-interface ReactionCounts {
-    [key: string]: number;
-}
-
-interface PostProps {
-    post: {
-        id: number;
-        user: {
-            name: string;
-            avatar: string;
-            timestamp: string;
-        };
-        content: string;
-        media: MediaItem[];
-        likes: number;
-        hasReacted: boolean;
-        userReaction?: string;
-        reactionCounts: ReactionCounts;
-        comments: Comment[];
-    };
-}
-
-const REACTIONS = {
-    like: '👍',
-    love: '❤️',
-    haha: '😂',
-    wow: '😮',
-    sad: '😢',
-    angry: '😠',
-};
+import { Comment } from './Comment';
+import { getMediaAspectClass, getMediaGridClass } from './mediaUtils';
+import type { PostProps, ReactionCounts } from './types';
+import { REACTIONS } from './types';
 
 export default function Post({ post }: PostProps) {
-    const [likes, setLikes] = useState(post.likes);
-    const [hasReacted, setHasReacted] = useState(post.hasReacted);
     const [comments, setComments] = useState(post.comments);
     const [showComments, setShowComments] = useState(false);
     const [newComment, setNewComment] = useState('');
@@ -69,7 +17,6 @@ export default function Post({ post }: PostProps) {
     const reactionPickerRef = useRef<HTMLDivElement>(null);
     const [replyingTo, setReplyingTo] = useState<number | null>(null);
     const [replyContents, setReplyContents] = useState<Record<number, string>>({});
-    const [loadingReaction, setLoadingReaction] = useState<string | null>(null);
     const [loadingCommentReaction, setLoadingCommentReaction] = useState<number | null>(null);
     const [sendingReply, setSendingReply] = useState<number | null>(null);
 
@@ -89,7 +36,6 @@ export default function Post({ post }: PostProps) {
 
     const handleReaction = async (type: string) => {
         try {
-            setLoadingReaction(type);
             const currentReaction = userReaction;
             const currentCounts = { ...reactionCounts };
 
@@ -122,8 +68,6 @@ export default function Post({ post }: PostProps) {
             console.error('Error setting reaction:', error);
             setReactionCounts(currentCounts);
             setUserReaction(currentReaction);
-        } finally {
-            setLoadingReaction(null);
         }
     };
 
@@ -259,95 +203,6 @@ export default function Post({ post }: PostProps) {
             setSendingReply(null);
         }
     };
-
-    const renderComment = (comment: Comment, isReply = false) => (
-        <div key={comment.id} className={`flex space-x-2 ${isReply ? 'mt-2 ml-8' : ''} animate-fadeIn`}>
-            <img src={comment.user.avatar ? `/storage/${comment.user.avatar}` : undefined} alt={comment.user.name} className="h-8 w-8 rounded-full" />
-            <div className="flex-1">
-                <div className="rounded-2xl bg-gray-100 px-3 py-2 dark:bg-gray-700">
-                    <p className="text-sm font-semibold">{comment.user.name}</p>
-                    <p className="text-sm">{comment.content}</p>
-                </div>
-                <div className="mt-1 flex space-x-3 text-xs text-gray-500">
-                    {!isReply && (
-                        <>
-                            <button
-                                onClick={() => handleCommentReaction(comment.id)}
-                                className={`relative font-semibold hover:underline ${comment.userReaction ? 'text-blue-500' : ''}`}
-                                disabled={loadingCommentReaction === comment.id}
-                            >
-                                <span className={loadingCommentReaction === comment.id ? 'opacity-0' : ''}>
-                                    Like {comment.reactions?.find((r) => r.type === 'like')?.count || 0}
-                                </span>
-                                {loadingCommentReaction === comment.id && (
-                                    <div className="absolute inset-0 flex items-center justify-center">
-                                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-blue-500 border-t-transparent"></div>
-                                    </div>
-                                )}
-                            </button>
-                            <button
-                                onClick={() => setReplyingTo(replyingTo === comment.id ? null : comment.id)}
-                                className="font-semibold hover:underline"
-                            >
-                                Reply
-                            </button>
-                        </>
-                    )}
-                    <span>{comment.timestamp}</span>
-                </div>
-
-                {replyingTo === comment.id && (
-                    <div className="animate-slideDown mt-2">
-                        <form
-                            onSubmit={(e) => {
-                                e.preventDefault();
-                                handleReply(comment.id);
-                            }}
-                            className="flex items-center space-x-2"
-                        >
-                            <img
-                                src={post.user.avatar ? `/storage/${post.user.avatar}` : undefined}
-                                alt="Your avatar"
-                                className="h-6 w-6 rounded-full"
-                            />
-                            <div className="relative flex-1">
-                                <input
-                                    type="text"
-                                    value={replyContents[comment.id] || ''}
-                                    onChange={(e) =>
-                                        setReplyContents((prev) => ({
-                                            ...prev,
-                                            [comment.id]: e.target.value,
-                                        }))
-                                    }
-                                    placeholder="Write a reply..."
-                                    className="w-full rounded-full bg-gray-100 px-4 py-2 pr-12 text-sm transition-colors duration-200 focus:bg-gray-50 focus:outline-none dark:bg-gray-700 dark:focus:bg-gray-600"
-                                    disabled={sendingReply === comment.id}
-                                />
-                                {sendingReply === comment.id ? (
-                                    <div className="absolute top-1/2 right-3 -translate-y-1/2">
-                                        <div className="h-5 w-5 animate-spin rounded-full border-2 border-blue-500 border-t-transparent"></div>
-                                    </div>
-                                ) : (
-                                    <button
-                                        type="submit"
-                                        disabled={!replyContents[comment.id]?.trim()}
-                                        className="absolute top-1/2 right-2 -translate-y-1/2 text-blue-500 disabled:opacity-50"
-                                    >
-                                        <svg className="h-6 w-6 rotate-90" fill="currentColor" viewBox="0 0 24 24">
-                                            <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
-                                        </svg>
-                                    </button>
-                                )}
-                            </div>
-                        </form>
-                    </div>
-                )}
-
-                {comment.replies?.length > 0 && <div className="mt-2">{comment.replies.map((reply) => renderComment(reply, true))}</div>}
-            </div>
-        </div>
-    );
 
     const handlePostClick = (e: React.MouseEvent) => {
         // Don't navigate if clicking on buttons or interactive elements
@@ -541,33 +396,25 @@ export default function Post({ post }: PostProps) {
                         </div>
                     </form>
 
-                    <div className="space-y-3">{comments.map((comment) => renderComment(comment))}</div>
+                    <div className="space-y-3">
+                        {comments.map((comment) => (
+                            <Comment
+                                key={comment.id}
+                                comment={comment}
+                                onReply={setReplyingTo}
+                                onReaction={handleCommentReaction}
+                                replyingTo={replyingTo}
+                                replyContents={replyContents}
+                                setReplyContents={setReplyContents}
+                                handleReply={handleReply}
+                                loadingCommentReaction={loadingCommentReaction}
+                                sendingReply={sendingReply}
+                                userAvatar={post.user.avatar}
+                            />
+                        ))}
+                    </div>
                 </div>
             )}
         </div>
     );
-}
-
-function getMediaGridClass(totalMedia: number): string {
-    switch (Math.min(totalMedia, 4)) {
-        case 1:
-            return 'grid-cols-1';
-        case 2:
-            return 'grid-cols-2';
-        case 3:
-            return 'grid-cols-2';
-        case 4:
-            return 'grid-cols-2';
-        default:
-            return 'grid-cols-1';
-    }
-}
-
-function getMediaAspectClass(totalMedia: number, index: number): string {
-    if (totalMedia === 1) return 'aspect-[16/9]';
-    if (totalMedia === 2) return 'aspect-square';
-    if (totalMedia === 3 && index === 0) return 'aspect-[16/9] col-span-2';
-    if (totalMedia === 3) return 'aspect-square';
-    if (totalMedia === 4) return 'aspect-square';
-    return 'aspect-square';
 }
