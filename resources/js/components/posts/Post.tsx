@@ -247,7 +247,7 @@ export default function Post({ post }: PostProps) {
 
     const renderComment = (comment: Comment, isReply = false) => (
         <div key={comment.id} className={`flex space-x-2 ${isReply ? 'ml-8 mt-2' : ''} animate-fadeIn`}>
-            <img src={comment.user.avatar} alt={comment.user.name} className="h-8 w-8 rounded-full" />
+            <img src={comment.user.avatar ? `/storage/${comment.user.avatar}` : undefined} alt={comment.user.name} className="h-8 w-8 rounded-full" />
             <div className="flex-1">
                 <div className="rounded-2xl bg-gray-100 px-3 py-2 dark:bg-gray-700">
                     <p className="text-sm font-semibold">{comment.user.name}</p>
@@ -288,7 +288,7 @@ export default function Post({ post }: PostProps) {
                             }}
                             className="flex items-center space-x-2"
                         >
-                            <img src={post.user.avatar} alt="Your avatar" className="h-6 w-6 rounded-full" />
+                            <img src={post.user.avatar ? `/storage/${post.user.avatar}` : undefined} alt="Your avatar" className="h-6 w-6 rounded-full" />
                             <div className="relative flex-1">
                                 <input
                                     type="text"
@@ -355,7 +355,7 @@ export default function Post({ post }: PostProps) {
                     <div className="flex items-center group cursor-pointer">
                         <div className="relative">
                             <img
-                                src={post.user.avatar}
+                                src={post.user.avatar ? `/storage/${post.user.avatar}` : undefined}
                                 alt={post.user.name}
                                 className="h-10 w-10 rounded-full ring-2 ring-offset-2 ring-transparent transition-all duration-200 group-hover:ring-blue-100"
                             />
@@ -513,7 +513,7 @@ export default function Post({ post }: PostProps) {
             {showComments && (
                 <div className="px-4 py-2 animate-fadeIn">
                     <form onSubmit={handleComment} className="mb-4 flex items-center space-x-2">
-                        <img src={post.user.avatar} alt="Your avatar" className="h-8 w-8 rounded-full" />
+                        <img src={post.user.avatar ? `/storage/${post.user.avatar}` : undefined} alt="Your avatar" className="h-8 w-8 rounded-full" />
                         <div className="relative flex-1">
                             <input
                                 type="text"
