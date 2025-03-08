@@ -3,8 +3,41 @@ import axios from 'axios';
 import { useEffect, useRef, useState } from 'react';
 import { Comment } from './Comment';
 import { getMediaAspectClass, getMediaGridClass } from './mediaUtils';
+import { ReactionPicker } from './ReactionPicker';
+import { ShareDialog } from './ShareDialog';
 import type { PostProps, ReactionCounts } from './types';
 import { REACTIONS } from './types';
+
+// Add these types at the top of the file
+declare global {
+    interface Window {
+        auth?: {
+            user?: {
+                id: number;
+            };
+        };
+    }
+}
+
+// Update PostProps interface to include user_id
+interface PostProps {
+    post: {
+        id: number;
+        user_id: number;
+        user: {
+            name: string;
+            avatar: string;
+            timestamp: string;
+        };
+        content: string;
+        media: MediaItem[];
+        likes: number;
+        hasReacted: boolean;
+        userReaction?: string;
+        reactionCounts: ReactionCounts;
+        comments: Comment[];
+    };
+}
 
 export default function Post({ post }: PostProps) {
     const [comments, setComments] = useState(post.comments);
@@ -38,20 +71,21 @@ export default function Post({ post }: PostProps) {
 
     const handleReaction = async (type: string) => {
         try {
-            const currentReaction = userReaction;
-            const currentCounts = { ...reactionCounts };
+            const prevReaction = userReaction;
+            const prevCounts = { ...reactionCounts };
 
-            if (currentReaction === type) {
+            // Optimistically update UI
+            if (prevReaction === type) {
                 setUserReaction(undefined);
                 setReactionCounts((prev) => ({
                     ...prev,
                     [type]: Math.max((prev[type] || 0) - 1, 0),
                 }));
             } else {
-                if (currentReaction) {
+                if (prevReaction) {
                     setReactionCounts((prev) => ({
                         ...prev,
-                        [currentReaction]: Math.max((prev[currentReaction] || 0) - 1, 0),
+                        [prevReaction]: Math.max((prev[prevReaction] || 0) - 1, 0),
                     }));
                 }
                 setUserReaction(type);
@@ -62,14 +96,14 @@ export default function Post({ post }: PostProps) {
             }
 
             const response = await axios.post(`/posts/${post.id}/react`, { type });
-
             setReactionCounts(response.data.reactionCounts);
             setUserReaction(response.data.userReaction);
             setShowReactionPicker(false);
         } catch (error) {
             console.error('Error setting reaction:', error);
-            setReactionCounts(currentCounts);
-            setUserReaction(currentReaction);
+            // Revert on error
+            setReactionCounts(prevCounts);
+            setUserReaction(prevReaction);
         }
     };
 
@@ -430,27 +464,6 @@ export default function Post({ post }: PostProps) {
                             </span>
                             <span className="font-semibold">Like</span>
                         </button>
-
-                        {showReactionPicker && (
-                            <div
-                                ref={reactionPickerRef}
-                                onMouseLeave={() => setShowReactionPicker(false)}
-                                className="absolute bottom-full left-0 mb-2 flex space-x-1 rounded-full bg-white p-1 shadow-[0_0_8px_rgba(0,0,0,0.2)] transition-all duration-200 dark:bg-gray-700"
-                            >
-                                {Object.entries(REACTIONS).map(([type, emoji]) => (
-                                    <button
-                                        key={type}
-                                        onClick={() => handleReaction(type)}
-                                        className={`transform cursor-pointer rounded-full p-2 text-3xl transition hover:scale-125 ${
-                                            userReaction === type ? 'scale-110' : ''
-                                        }`}
-                                        title={type}
-                                    >
-                                        {emoji}
-                                    </button>
-                                ))}
-                            </div>
-                        )}
                     </div>
                     <button
                         onClick={() => setShowComments(!showComments)}
@@ -517,64 +530,15 @@ export default function Post({ post }: PostProps) {
                 </div>
             )}
 
-            {showShareDialog && (
-                <div
-                    className="backdrop-blur fixed inset-0 z-50 flex items-center justify-center"
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        setShowShareDialog(false);
-                    }}
-                >
-                    <div className="w-full max-w-md rounded-lg bg-white p-6 dark:bg-gray-800" onClick={(e) => e.stopPropagation()}>
-                        <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">Share Post</h3>
+            <ReactionPicker
+                show={showReactionPicker}
+                onReaction={handleReaction}
+                userReaction={userReaction}
+                pickerRef={reactionPickerRef}
+                onMouseLeave={() => setShowReactionPicker(false)}
+            />
 
-                        <div className="space-y-4">
-                            <button
-                                onClick={copyToClipboard}
-                                className="flex w-full items-center justify-center space-x-2 rounded-lg bg-gray-100 px-4 py-2 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600"
-                            >
-                                <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z" />
-                                </svg>
-                                <span>Copy Link</span>
-                            </button>
-
-                            <div className="flex justify-center space-x-4">
-                                <a
-                                    href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(`${window.location.origin}/posts/${post.id}`)}`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="hover:bg-opacity-90 rounded-full bg-[#1DA1F2] p-2 text-white"
-                                    onClick={(e) => e.stopPropagation()}
-                                >
-                                    <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
-                                        <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z" />
-                                    </svg>
-                                </a>
-
-                                <a
-                                    href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(`${window.location.origin}/posts/${post.id}`)}`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="hover:bg-opacity-90 rounded-full bg-[#1877F2] p-2 text-white"
-                                    onClick={(e) => e.stopPropagation()}
-                                >
-                                    <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
-                                        <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-                                    </svg>
-                                </a>
-                            </div>
-                        </div>
-
-                        <button
-                            onClick={() => setShowShareDialog(false)}
-                            className="mt-6 w-full rounded-lg bg-gray-200 px-4 py-2 font-semibold text-gray-700 hover:bg-gray-300 dark:bg-gray-600 dark:text-white dark:hover:bg-gray-500"
-                        >
-                            Close
-                        </button>
-                    </div>
-                </div>
-            )}
+            <ShareDialog postId={post.id} show={showShareDialog} onClose={() => setShowShareDialog(false)} />
         </div>
     );
 }
