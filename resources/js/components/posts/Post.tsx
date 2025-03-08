@@ -279,6 +279,31 @@ export default function Post({ post }: PostProps) {
         }
     };
 
+    const formatTimestamp = (created_at: string) => {
+        const date = new Date(created_at);
+        const now = new Date();
+        const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+        if (diffInSeconds < 60) {
+            return 'Just now';
+        } else if (diffInSeconds < 3600) {
+            const minutes = Math.floor(diffInSeconds / 60);
+            return `${minutes}m`;
+        } else if (diffInSeconds < 86400) {
+            const hours = Math.floor(diffInSeconds / 3600);
+            return `${hours}h`;
+        } else if (diffInSeconds < 604800) {
+            const days = Math.floor(diffInSeconds / 86400);
+            return `${days}d`;
+        } else {
+            return date.toLocaleDateString('en-US', {
+                month: 'long',
+                day: 'numeric',
+                year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined,
+            });
+        }
+    };
+
     return (
         <div
             id={`post-${post.id}`}
@@ -307,7 +332,7 @@ export default function Post({ post }: PostProps) {
                                 {post.user.name}
                             </h3>
                             <div className="flex items-center text-[13px] text-[#65676B] dark:text-gray-400">
-                                <span>{post.user.timestamp}</span>
+                                <span>{formatTimestamp(post.created_at)}</span>
                                 <span className="mx-1">·</span>
                                 <svg className="h-3.5 w-3.5 fill-current" viewBox="0 0 16 16">
                                     <path d="M8 0a8 8 0 100 16A8 8 0 008 0zm0 14A6 6 0 118 2a6 6 0 010 12z" />
@@ -519,7 +544,7 @@ export default function Post({ post }: PostProps) {
 
             {showShareDialog && (
                 <div
-                    className="backdrop-blur fixed inset-0 z-50 flex items-center justify-center"
+                    className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur"
                     onClick={(e) => {
                         e.stopPropagation();
                         setShowShareDialog(false);
