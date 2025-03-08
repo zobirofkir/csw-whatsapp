@@ -1,4 +1,5 @@
 import Post from '@/components/posts/Post';
+import AppLayout from '@/layouts/app-layout';
 import { Post as PostType } from '@/types';
 import { Head, usePage } from '@inertiajs/react';
 
@@ -9,10 +10,10 @@ interface Props {
 export default function Show({ post }: Props) {
     const {auth} = usePage().props;
     return (
-        <section>
+        <AppLayout>
             <Head title={`Post by ${post.user.name}`} />
 
-            <div className="fixed inset-0 flex items-center justify-center overflow-y-auto bg-[#F0F2F5] dark:bg-[#1C1E21]">
+            <div className="fixed inset-0 flex items-center justify-center overflow-y-auto bg-[#F0F2F5] dark:bg-[#1C1E21] z-4">
                 {/* Modal Container */}
                 <div className="animate-fadeIn relative my-0 min-h-screen w-full max-w-[680px] bg-white shadow-xl md:my-8 md:min-h-0 md:rounded-lg dark:bg-[#242526]">
                     {/* Header */}
@@ -34,6 +35,6 @@ export default function Show({ post }: Props) {
                     </div>
                 </div>
             </div>
-        </section>
+        </AppLayout>
     );
 }
