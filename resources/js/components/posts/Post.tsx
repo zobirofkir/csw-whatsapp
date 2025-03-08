@@ -227,7 +227,7 @@ export default function Post({ post }: PostProps) {
                     <div className="group flex cursor-pointer items-center">
                         <div className="relative">
                             <img
-                                src={post.user.avatar ? `/storage/${post.user.avatar}` : undefined}
+                                src={post.user.avatar?.startsWith('http') ? post.user.avatar : post.user.avatar ? `/storage/${post.user.avatar}` : undefined}
                                 alt={post.user.name}
                                 className="h-10 w-10 rounded-full ring-2 ring-transparent ring-offset-2 transition-all duration-200 group-hover:ring-blue-100"
                             />
