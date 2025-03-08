@@ -32,7 +32,7 @@ class PostService
             ->map(fn ($post) => $this->formatPost($post, $currentUser));
     }
 
-    private function formatPost(Post $post, User $user): array
+    public function formatPost(Post $post, User $user): array
     {
         $reactionCounts = $post->reactions()
             ->select('type')
@@ -71,16 +71,20 @@ class PostService
         ];
     }
 
-    private function formatComment($comment, $user): array
+    public function formatComment($comment, User $user): array
     {
         return [
             'id' => $comment->id,
             'content' => $comment->content,
             'user' => $this->formatUser($comment->user),
             'timestamp' => $comment->created_at->diffForHumans(),
-            'reactions' => $comment->reactions,
+            'reactions' => $comment->reactions()
+                ->select('type')
+                ->selectRaw('count(*) as count')
+                ->groupBy('type')
+                ->get(),
             'userReaction' => $comment->reactions()->where('user_id', $user->id)->value('type'),
-            'replies' => []
+            'replies' => $comment->replies->map(fn ($reply) => $this->formatComment($reply, $user))
         ];
     }
 

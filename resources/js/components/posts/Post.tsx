@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { useEffect, useRef, useState } from 'react';
+import { router } from '@inertiajs/react';
 
 interface MediaItem {
     id: number;
@@ -326,8 +327,29 @@ export default function Post({ post }: PostProps) {
         </div>
     );
 
+    const handlePostClick = (e: React.MouseEvent) => {
+        // Don't navigate if clicking on buttons or interactive elements
+        const target = e.target as HTMLElement;
+        if (
+            target.closest('button') ||
+            target.closest('input') ||
+            target.closest('a') ||
+            target.closest('.interactive-element')
+        ) {
+            return;
+        }
+
+        // Only navigate if we're not already on the post page
+        if (!window.location.pathname.includes(`/posts/${post.id}`)) {
+            router.visit(`/posts/${post.id}`);
+        }
+    };
+
     return (
-        <div className="mb-4 overflow-hidden rounded-xl bg-white shadow-sm transition-shadow duration-200 hover:shadow-md dark:bg-gray-800">
+        <div
+            className="mb-4 overflow-hidden rounded-xl bg-white shadow-sm transition-shadow duration-200 hover:shadow-md dark:bg-gray-800 cursor-pointer"
+            onClick={handlePostClick}
+        >
             <div className="p-4">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center group cursor-pointer">

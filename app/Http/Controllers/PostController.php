@@ -8,6 +8,7 @@ use App\Services\ReactionService;
 use App\Http\Requests\StorePostRequest;
 use App\Models\Post;
 use App\Models\Comment;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -21,7 +22,9 @@ class PostController extends Controller
 
     public function index(): JsonResponse
     {
-        $posts = $this->postService->getFormattedPosts(Auth::user());
+        /** @var User $user */
+        $user = Auth::user();
+        $posts = $this->postService->getFormattedPosts($user);
         return response()->json(['data' => $posts]);
     }
 
@@ -38,11 +41,13 @@ class PostController extends Controller
 
     public function toggleReaction(Request $request, Post $post): JsonResponse
     {
+        /** @var User $user */
+        $user = Auth::user();
         $request->validate(['type' => 'required|string']);
 
         $result = $this->reactionService->toggleReaction(
             $post,
-            Auth::user(),
+            $user,
             $request->input('type')
         );
 
@@ -71,11 +76,13 @@ class PostController extends Controller
 
     public function commentReaction(Request $request, Comment $comment): JsonResponse
     {
+        /** @var User $user */
+        $user = Auth::user();
         $request->validate(['type' => 'required|string']);
 
         $result = $this->reactionService->toggleReaction(
             $comment,
-            Auth::user(),
+            $user,
             $request->input('type')
         );
 
