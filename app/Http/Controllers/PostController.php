@@ -53,4 +53,21 @@ class PostController extends Controller
             'post' => $post,
         ]);
     }
+
+    /**
+     * Delete a post
+     *
+     * @param Post $post The post to delete
+     * @return JsonResponse
+     */
+    public function destroy(Post $post): JsonResponse
+    {
+        if ($post->user_id !== auth()->id()) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $this->postService->deletePost($post);
+
+        return response()->json(['message' => 'Post deleted successfully']);
+    }
 }

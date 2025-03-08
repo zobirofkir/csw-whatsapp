@@ -167,4 +167,20 @@ class PostService
             ->map(fn ($post) => $this->formatPost($post, $user))
             ->toArray();
     }
+
+    /**
+     * Delete a post and its associated media
+     *
+     * @param Post $post The post to delete
+     * @return void
+     */
+    public function deletePost(Post $post): void
+    {
+        // Delete associated media files from storage
+        foreach ($post->media as $media) {
+            Storage::disk('public')->delete($media->path);
+        }
+
+        $post->delete();
+    }
 }

@@ -19,6 +19,7 @@ export default function Post({ post }: PostProps) {
     const [replyContents, setReplyContents] = useState<Record<number, string>>({});
     const [loadingCommentReaction, setLoadingCommentReaction] = useState<number | null>(null);
     const [sendingReply, setSendingReply] = useState<number | null>(null);
+    const [showMenu, setShowMenu] = useState(false);
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -217,8 +218,33 @@ export default function Post({ post }: PostProps) {
         }
     };
 
+    const handleDeletePost = async (e: React.MouseEvent) => {
+        e.stopPropagation(); // Prevent post click navigation
+
+        if (!confirm('Are you sure you want to delete this post?')) {
+            return;
+        }
+
+        try {
+            await axios.delete(`/posts/${post.id}`);
+            // If we're on the post's page, redirect to home
+            if (window.location.pathname.includes(`/posts/${post.id}`)) {
+                router.visit('/');
+            } else {
+                // Remove the post from the DOM
+                const postElement = document.getElementById(`post-${post.id}`);
+                if (postElement) {
+                    postElement.remove();
+                }
+            }
+        } catch (error) {
+            console.error('Error deleting post:', error);
+        }
+    };
+
     return (
         <div
+            id={`post-${post.id}`}
             className="mb-4 cursor-pointer overflow-hidden rounded-xl bg-white shadow-sm transition-shadow duration-200 hover:shadow-md dark:bg-gray-800"
             onClick={handlePostClick}
         >
@@ -227,7 +253,13 @@ export default function Post({ post }: PostProps) {
                     <div className="group flex cursor-pointer items-center">
                         <div className="relative">
                             <img
-                                src={post.user.avatar?.startsWith('http') ? post.user.avatar : post.user.avatar ? `/storage/${post.user.avatar}` : undefined}
+                                src={
+                                    post.user.avatar?.startsWith('http')
+                                        ? post.user.avatar
+                                        : post.user.avatar
+                                          ? `/storage/${post.user.avatar}`
+                                          : undefined
+                                }
                                 alt={post.user.name}
                                 className="h-10 w-10 rounded-full ring-2 ring-transparent ring-offset-2 transition-all duration-200 group-hover:ring-blue-100"
                             />
@@ -246,11 +278,40 @@ export default function Post({ post }: PostProps) {
                             </div>
                         </div>
                     </div>
-                    <button className="rounded-full p-2 text-[#65676B] transition-colors duration-200 hover:bg-[#F0F2F5] dark:hover:bg-gray-700">
-                        <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" />
-                        </svg>
-                    </button>
+                    {post.user_id === window.auth?.user?.id && (
+                        <div className="relative">
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setShowMenu(!showMenu);
+                                }}
+                                className="rounded-full p-2 text-[#65676B] transition-colors duration-200 hover:bg-[#F0F2F5] dark:hover:bg-gray-700"
+                            >
+                                <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" />
+                                </svg>
+                            </button>
+
+                            {showMenu && (
+                                <div
+                                    className="ring-opacity-5 absolute top-full right-0 mt-1 w-48 rounded-md bg-white shadow-lg ring-1 ring-black dark:bg-gray-700"
+                                    onClick={(e) => e.stopPropagation()}
+                                >
+                                    <div className="py-1">
+                                        <button
+                                            onClick={handleDeletePost}
+                                            className="flex w-full items-center px-4 py-2 text-sm text-red-600 hover:bg-gray-100 dark:hover:bg-gray-600"
+                                        >
+                                            <svg className="mr-3 h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+                                                <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" />
+                                            </svg>
+                                            Delete Post
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
                 </div>
 
                 <p className="mt-3 text-[15px] leading-relaxed whitespace-pre-wrap text-[#050505] dark:text-white">{post.content}</p>

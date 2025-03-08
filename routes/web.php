@@ -25,6 +25,7 @@ Route::controller(PageController::class)->middleware([ 'auth',ValidateSessionWit
     Route::get('/posts', [PostController::class, 'index'])->name('posts.index');
     Route::post('/posts', [PostController::class, 'store'])->name('posts.store');
     Route::get('/posts/{post}', [PageController::class, 'showPost'])->name('posts.show');
+    Route::delete('/posts/{post}', [PostController::class, 'destroy'])->name('posts.destroy');
 
     /**
      * Reaction Management Routes
