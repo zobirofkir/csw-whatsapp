@@ -17,6 +17,19 @@ interface Props {
 export default function ProfileHeader({ data, auth, hasChanges, processing, onSubmit, onNameChange, onAvatarChange }: Props) {
     const fileInput = useRef<HTMLInputElement>(null);
 
+    const getAvatarUrl = () => {
+        if (data.avatar) {
+            return URL.createObjectURL(data.avatar);
+        }
+
+        if (auth.user.avatar) {
+            // Check if the avatar URL is an absolute URL (like WorkOS URLs)
+            return auth.user.avatar.startsWith('http') ? auth.user.avatar : `/storage/${auth.user.avatar}`;
+        }
+
+        return undefined;
+    };
+
     return (
         <form
             onSubmit={onSubmit}
@@ -24,10 +37,7 @@ export default function ProfileHeader({ data, auth, hasChanges, processing, onSu
         >
             <div className="relative -mt-[85px] ml-4 lg:-mt-[132px]">
                 <Avatar className="h-[168px] w-[168px] rounded-full border-4 border-white ring-0 dark:border-gray-900">
-                    <AvatarImage
-                        src={data.avatar ? URL.createObjectURL(data.avatar) : auth.user.avatar ? `/storage/${auth.user.avatar}` : undefined}
-                        className="rounded-full object-cover"
-                    />
+                    <AvatarImage src={getAvatarUrl()} className="rounded-full object-cover" />
                     <AvatarFallback>{auth.user.name.charAt(0)}</AvatarFallback>
                 </Avatar>
                 <Button
