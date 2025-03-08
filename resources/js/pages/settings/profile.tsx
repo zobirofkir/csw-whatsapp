@@ -1,9 +1,11 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { type BreadcrumbItem, type PostType, type SharedData } from '@/types';
+import { Transition } from '@headlessui/react';
 import { Head, useForm, usePage } from '@inertiajs/react';
-import { FormEventHandler, useRef } from 'react';
+import { useRef } from 'react';
 
 import CreatePostForm from '@/components/posts/CreatePostForm';
+import InputError from '@/components/input-error';
 import Post from '@/components/posts/Post';
 import { Button } from '@/components/ui/button';
 import SettingsLayout from '@/layouts/settings/layout';
@@ -16,29 +18,26 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-interface ProfileForm {
+interface ProfileForm extends Record<string, any> {
     name: string;
     avatar: File | null;
-    _method: string;
-}
-
-interface ProfileFormData {
-    name: string;
-    avatar: File | null;
+    cover_photo: File | null;
     _method: string;
 }
 
 export default function Profile() {
     const { auth, userPosts } = usePage<SharedData & { userPosts: PostType[] }>().props;
     const fileInput = useRef<HTMLInputElement>(null);
+    const coverPhotoInput = useRef<HTMLInputElement>(null);
 
     const { data, setData, post, errors, processing, recentlySuccessful } = useForm<ProfileForm>({
         name: auth.user.name,
         avatar: null,
+        cover_photo: null,
         _method: 'patch',
     });
 
-    const submit: FormEventHandler = (e) => {
+    const updateProfile = (e: React.FormEvent) => {
         e.preventDefault();
 
         const formData = new FormData();
@@ -47,16 +46,33 @@ export default function Profile() {
         if (data.avatar) {
             formData.append('avatar', data.avatar);
         }
+        if (data.cover_photo) {
+            formData.append('cover_photo', data.cover_photo);
+        }
 
         post(route('profile.update'), {
             preserveScroll: true,
             forceFormData: true,
+            onSuccess: () => {
+                if (data.avatar) {
+                    setData('avatar', null);
+                }
+                if (data.cover_photo) {
+                    setData('cover_photo', null);
+                }
+            },
         });
     };
 
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files?.[0]) {
             setData('avatar', e.target.files[0]);
+        }
+    };
+
+    const handleCoverPhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files?.[0]) {
+            setData('cover_photo', e.target.files[0]);
         }
     };
 
@@ -67,11 +83,16 @@ export default function Profile() {
             <SettingsLayout>
                 {/* Cover Photo Section */}
                 <div className="relative h-[350px] w-full overflow-hidden rounded-b-xl bg-gray-200 dark:bg-gray-700">
-                    <img src={auth.user.cover_photo || '/images/default-cover.jpg'} alt="Cover" className="h-full w-full object-cover" />
+                    <img
+                        src={data.cover_photo ? URL.createObjectURL(data.cover_photo) : auth.user.cover_photo || '/images/default-cover.jpg'}
+                        alt="Cover"
+                        className="h-full w-full object-cover"
+                    />
+                    <input type="file" ref={coverPhotoInput} className="hidden" onChange={handleCoverPhotoChange} accept="image/*" />
                     <Button
                         variant="secondary"
                         className="absolute right-4 bottom-4 bg-white/90 dark:bg-gray-800/90"
-                        onClick={() => fileInput.current?.click()}
+                        onClick={() => coverPhotoInput.current?.click()}
                     >
                         <i className="fas fa-camera mr-2" />
                         Edit Cover Photo
@@ -80,45 +101,65 @@ export default function Profile() {
 
                 {/* Profile Header Section */}
                 <div className="relative mx-auto max-w-5xl px-4">
-                    <div className="-mt-[96px] flex flex-col items-center sm:flex-row sm:items-end sm:space-x-5">
-                        <Avatar className="h-[168px] w-[168px] ring-4 ring-white dark:ring-gray-800">
-                            <AvatarImage
-                                src={
-                                    data.avatar
-                                        ? URL.createObjectURL(data.avatar)
-                                        : auth.user.avatar?.startsWith('http')
-                                          ? auth.user.avatar
-                                          : auth.user.avatar
-                                            ? `/storage/${auth.user.avatar}`
-                                            : undefined
-                                }
-                            />
-                            <AvatarFallback>{auth.user.name.charAt(0)}</AvatarFallback>
-                            <Button
-                                variant="secondary"
-                                className="absolute right-4 bottom-4 h-8 w-8 rounded-full bg-gray-200 p-0 hover:bg-gray-300 dark:bg-gray-700"
-                                onClick={() => fileInput.current?.click()}
-                            >
-                                <i className="fas fa-camera" />
-                            </Button>
-                        </Avatar>
+                    <form onSubmit={updateProfile} className="space-y-6">
+                        <div className="-mt-[96px] flex flex-col items-center sm:flex-row sm:items-end sm:space-x-5">
+                            <div className="relative">
+                                <Avatar className="h-[168px] w-[168px] ring-4 ring-white dark:ring-gray-800">
+                                    <AvatarImage
+                                        src={
+                                            data.avatar
+                                                ? URL.createObjectURL(data.avatar)
+                                                : auth.user.avatar?.startsWith('http')
+                                                  ? auth.user.avatar
+                                                  : auth.user.avatar
+                                                    ? `/storage/${auth.user.avatar}`
+                                                    : undefined
+                                        }
+                                    />
+                                    <AvatarFallback>{auth.user.name.charAt(0)}</AvatarFallback>
+                                </Avatar>
+                                <input type="file" ref={fileInput} className="hidden" onChange={handleAvatarChange} accept="image/*" />
+                                <Button
+                                    type="button"
+                                    variant="secondary"
+                                    className="absolute right-4 bottom-4 h-8 w-8 rounded-full bg-gray-200 p-0 hover:bg-gray-300 dark:bg-gray-700"
+                                    onClick={() => fileInput.current?.click()}
+                                >
+                                    <i className="fas fa-camera" />
+                                </Button>
+                                {errors.avatar && <InputError message={errors.avatar} className="mt-2" />}
+                            </div>
 
-                        <div className="mt-6 flex-1 sm:mt-0">
-                            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{auth.user.name}</h1>
-                            <p className="text-gray-500 dark:text-gray-400">500 friends</p>
-                        </div>
+                            <div className="mt-6 flex-1 sm:mt-0">
+                                <input
+                                    type="text"
+                                    value={data.name}
+                                    onChange={(e) => setData('name', e.target.value)}
+                                    className="w-full border-0 bg-transparent p-0 text-3xl font-bold text-gray-900 focus:ring-0 dark:text-white"
+                                    placeholder="Your name"
+                                />
+                                {errors.name && <InputError message={errors.name} className="mt-1" />}
+                                <p className="text-gray-500 dark:text-gray-400">500 friends</p>
+                            </div>
 
-                        <div className="mt-6 flex space-x-3 sm:mt-0">
-                            <Button variant="default" className="flex items-center">
-                                <i className="fas fa-plus mr-2" />
-                                Add to Story
-                            </Button>
-                            <Button variant="default" className="flex items-center">
-                                <i className="fas fa-pen mr-2" />
-                                Edit Profile
-                            </Button>
+                            <div className="mt-6 flex space-x-3 sm:mt-0">
+                                <Button type="submit" variant="default" disabled={processing}>
+                                    Save Changes
+                                </Button>
+                            </div>
                         </div>
-                    </div>
+                    </form>
+
+                    {/* Show success message */}
+                    <Transition
+                        show={recentlySuccessful}
+                        enter="transition ease-in-out duration-300"
+                        enterFrom="opacity-0"
+                        leave="transition ease-in-out duration-300"
+                        leaveTo="opacity-0"
+                    >
+                        <p className="mt-2 text-sm text-green-600 dark:text-green-400">Profile updated successfully.</p>
+                    </Transition>
 
                     {/* Navigation Tabs */}
                     <div className="mt-6 border-b border-gray-200 dark:border-gray-700">
