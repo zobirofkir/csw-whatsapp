@@ -6,6 +6,8 @@ import { useEffect, useRef, useState } from 'react';
 import CreatePostForm from '@/components/posts/CreatePostForm';
 import Post from '@/components/posts/Post';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import SettingsLayout from '@/layouts/settings/layout';
 import ProfileLayout from '@/layouts/settings/profile-layout';
 
@@ -28,11 +30,27 @@ interface CustomPageProps extends PageProps {
     userPosts: PostType[];
 }
 
+interface IntroForm {
+    bio: string;
+    work?: string;
+    education?: string;
+    location?: string;
+    relationship?: string;
+}
+
 export default function Profile() {
     const { auth, userPosts } = usePage<CustomPageProps>().props;
     const fileInput = useRef<HTMLInputElement>(null);
     const coverPhotoInput = useRef<HTMLInputElement>(null);
     const [hasChanges, setHasChanges] = useState(false);
+    const [activeIntroForm, setActiveIntroForm] = useState<'bio' | 'details' | 'featured' | null>(null);
+    const [introForm, setIntroForm] = useState<IntroForm>({
+        bio: auth.user.bio || '',
+        work: auth.user.work || '',
+        education: auth.user.education || '',
+        location: auth.user.location || '',
+        relationship: auth.user.relationship || '',
+    });
 
     const { data, setData, post, errors, processing, recentlySuccessful } = useForm<ProfileForm>({
         name: auth.user.name,
@@ -86,6 +104,18 @@ export default function Profile() {
         if (e.target.files?.[0]) {
             setData('cover_photo', e.target.files[0]);
         }
+    };
+
+    const handleIntroSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        // Here you would implement the API call to save the intro data
+        post(route('profile.update.intro'), {
+            preserveScroll: true,
+            data: introForm,
+            onSuccess: () => {
+                setActiveIntroForm(null);
+            },
+        });
     };
 
     return (
@@ -262,24 +292,118 @@ export default function Profile() {
                             <div className="rounded-lg bg-white p-4 shadow dark:bg-gray-800">
                                 <h2 className="text-[17px] font-semibold">Intro</h2>
                                 <div className="mt-3 space-y-3">
-                                    <Button
-                                        variant="secondary"
-                                        className="w-full justify-center bg-gray-100 font-medium hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600"
-                                    >
-                                        Add bio
-                                    </Button>
-                                    <Button
-                                        variant="secondary"
-                                        className="w-full justify-center bg-gray-100 font-medium hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600"
-                                    >
-                                        Edit details
-                                    </Button>
-                                    <Button
-                                        variant="secondary"
-                                        className="w-full justify-center bg-gray-100 font-medium hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600"
-                                    >
-                                        Add featured
-                                    </Button>
+                                    {activeIntroForm === 'bio' ? (
+                                        <form onSubmit={handleIntroSubmit} className="space-y-3">
+                                            <Textarea
+                                                placeholder="Write something about yourself..."
+                                                value={introForm.bio}
+                                                onChange={(e) => setIntroForm({ ...introForm, bio: e.target.value })}
+                                                className="min-h-[100px]"
+                                            />
+                                            <div className="flex justify-end space-x-2">
+                                                <Button type="button" variant="secondary" onClick={() => setActiveIntroForm(null)}>
+                                                    Cancel
+                                                </Button>
+                                                <Button type="submit">Save</Button>
+                                            </div>
+                                        </form>
+                                    ) : (
+                                        <Button
+                                            variant="secondary"
+                                            className="w-full justify-center bg-gray-100 font-medium hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600"
+                                            onClick={() => setActiveIntroForm('bio')}
+                                        >
+                                            Add bio
+                                        </Button>
+                                    )}
+
+                                    {activeIntroForm === 'details' ? (
+                                        <form onSubmit={handleIntroSubmit} className="space-y-3">
+                                            <div className="space-y-2">
+                                                <Input
+                                                    placeholder="Work"
+                                                    value={introForm.work}
+                                                    onChange={(e) => setIntroForm({ ...introForm, work: e.target.value })}
+                                                />
+                                                <Input
+                                                    placeholder="Education"
+                                                    value={introForm.education}
+                                                    onChange={(e) => setIntroForm({ ...introForm, education: e.target.value })}
+                                                />
+                                                <Input
+                                                    placeholder="Location"
+                                                    value={introForm.location}
+                                                    onChange={(e) => setIntroForm({ ...introForm, location: e.target.value })}
+                                                />
+                                                <Input
+                                                    placeholder="Relationship Status"
+                                                    value={introForm.relationship}
+                                                    onChange={(e) => setIntroForm({ ...introForm, relationship: e.target.value })}
+                                                />
+                                            </div>
+                                            <div className="flex justify-end space-x-2">
+                                                <Button type="button" variant="secondary" onClick={() => setActiveIntroForm(null)}>
+                                                    Cancel
+                                                </Button>
+                                                <Button type="submit">Save</Button>
+                                            </div>
+                                        </form>
+                                    ) : (
+                                        <Button
+                                            variant="secondary"
+                                            className="w-full justify-center bg-gray-100 font-medium hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600"
+                                            onClick={() => setActiveIntroForm('details')}
+                                        >
+                                            Edit details
+                                        </Button>
+                                    )}
+
+                                    {activeIntroForm === 'featured' ? (
+                                        <form onSubmit={handleIntroSubmit} className="space-y-3">
+                                            {/* Add your featured content form fields here */}
+                                            <div className="flex justify-end space-x-2">
+                                                <Button type="button" variant="secondary" onClick={() => setActiveIntroForm(null)}>
+                                                    Cancel
+                                                </Button>
+                                                <Button type="submit">Save</Button>
+                                            </div>
+                                        </form>
+                                    ) : (
+                                        <Button
+                                            variant="secondary"
+                                            className="w-full justify-center bg-gray-100 font-medium hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600"
+                                            onClick={() => setActiveIntroForm('featured')}
+                                        >
+                                            Add featured
+                                        </Button>
+                                    )}
+
+                                    {/* Display saved intro information */}
+                                    {(introForm.bio || introForm.work || introForm.education || introForm.location || introForm.relationship) && (
+                                        <div className="mt-4 space-y-2 text-sm">
+                                            {introForm.bio && <p>{introForm.bio}</p>}
+                                            {introForm.work && (
+                                                <p className="flex items-center gap-2">
+                                                    <i className="fas fa-briefcase" /> Works at {introForm.work}
+                                                </p>
+                                            )}
+                                            {introForm.education && (
+                                                <p className="flex items-center gap-2">
+                                                    <i className="fas fa-graduation-cap" /> Studied at {introForm.education}
+                                                </p>
+                                            )}
+                                            {introForm.location && (
+                                                <p className="flex items-center gap-2">
+                                                    <i className="fas fa-home" /> Lives in {introForm.location}
+                                                </p>
+                                            )}
+                                            {introForm.relationship && (
+                                                <p className="flex items-center gap-2">
+                                                    <i className="fas fa-heart" /> {introForm.relationship}
+                                                </p>
+                                            )}
+                                        </div>
+                                    )}
                                 </div>
                             </div>
 
