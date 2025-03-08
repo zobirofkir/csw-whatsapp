@@ -20,6 +20,7 @@ export default function Post({ post }: PostProps) {
     const [loadingCommentReaction, setLoadingCommentReaction] = useState<number | null>(null);
     const [sendingReply, setSendingReply] = useState<number | null>(null);
     const [showMenu, setShowMenu] = useState(false);
+    const [showShareDialog, setShowShareDialog] = useState(false);
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -242,6 +243,42 @@ export default function Post({ post }: PostProps) {
         }
     };
 
+    const handleShare = async (e: React.MouseEvent) => {
+        e.stopPropagation(); // Prevent post click navigation
+
+        const postUrl = `${window.location.origin}/posts/${post.id}`;
+
+        if (navigator.share) {
+            try {
+                await navigator.share({
+                    title: `Post by ${post.user.name}`,
+                    text: post.content,
+                    url: postUrl,
+                });
+            } catch (error) {
+                if ((error as Error).name !== 'AbortError') {
+                    setShowShareDialog(true);
+                }
+            }
+        } else {
+            setShowShareDialog(true);
+        }
+    };
+
+    const copyToClipboard = async (e: React.MouseEvent) => {
+        e.stopPropagation();
+        const postUrl = `${window.location.origin}/posts/${post.id}`;
+
+        try {
+            await navigator.clipboard.writeText(postUrl);
+            // You might want to show a toast notification here
+            alert('Link copied to clipboard!');
+            setShowShareDialog(false);
+        } catch (error) {
+            console.error('Failed to copy:', error);
+        }
+    };
+
     return (
         <div
             id={`post-${post.id}`}
@@ -424,7 +461,10 @@ export default function Post({ post }: PostProps) {
                         </svg>
                         <span className="font-semibold">Comment</span>
                     </button>
-                    <button className="flex flex-1 items-center justify-center space-x-2 rounded-lg py-2 text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700">
+                    <button
+                        onClick={handleShare}
+                        className="flex flex-1 items-center justify-center space-x-2 rounded-lg py-2 text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700"
+                    >
                         <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92c0-1.61-1.31-2.92-2.92-2.92zM18 4c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zM6 13c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm12 7.02c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1z" />
                         </svg>
@@ -473,6 +513,65 @@ export default function Post({ post }: PostProps) {
                                 userAvatar={post.user.avatar}
                             />
                         ))}
+                    </div>
+                </div>
+            )}
+
+            {showShareDialog && (
+                <div
+                    className="backdrop-blur fixed inset-0 z-50 flex items-center justify-center"
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        setShowShareDialog(false);
+                    }}
+                >
+                    <div className="w-full max-w-md rounded-lg bg-white p-6 dark:bg-gray-800" onClick={(e) => e.stopPropagation()}>
+                        <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">Share Post</h3>
+
+                        <div className="space-y-4">
+                            <button
+                                onClick={copyToClipboard}
+                                className="flex w-full items-center justify-center space-x-2 rounded-lg bg-gray-100 px-4 py-2 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600"
+                            >
+                                <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z" />
+                                </svg>
+                                <span>Copy Link</span>
+                            </button>
+
+                            <div className="flex justify-center space-x-4">
+                                <a
+                                    href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(`${window.location.origin}/posts/${post.id}`)}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="hover:bg-opacity-90 rounded-full bg-[#1DA1F2] p-2 text-white"
+                                    onClick={(e) => e.stopPropagation()}
+                                >
+                                    <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z" />
+                                    </svg>
+                                </a>
+
+                                <a
+                                    href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(`${window.location.origin}/posts/${post.id}`)}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="hover:bg-opacity-90 rounded-full bg-[#1877F2] p-2 text-white"
+                                    onClick={(e) => e.stopPropagation()}
+                                >
+                                    <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+                                    </svg>
+                                </a>
+                            </div>
+                        </div>
+
+                        <button
+                            onClick={() => setShowShareDialog(false)}
+                            className="mt-6 w-full rounded-lg bg-gray-200 px-4 py-2 font-semibold text-gray-700 hover:bg-gray-300 dark:bg-gray-600 dark:text-white dark:hover:bg-gray-500"
+                        >
+                            Close
+                        </button>
                     </div>
                 </div>
             )}
