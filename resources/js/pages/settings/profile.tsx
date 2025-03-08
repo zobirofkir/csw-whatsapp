@@ -1,7 +1,7 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { type BreadcrumbItem, type FormDataType, type PageProps, type PostType, type SharedData } from '@/types';
 import { Head, useForm, usePage } from '@inertiajs/react';
-import { useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import CreatePostForm from '@/components/posts/CreatePostForm';
 import Post from '@/components/posts/Post';
@@ -32,6 +32,7 @@ export default function Profile() {
     const { auth, userPosts } = usePage<CustomPageProps>().props;
     const fileInput = useRef<HTMLInputElement>(null);
     const coverPhotoInput = useRef<HTMLInputElement>(null);
+    const [hasChanges, setHasChanges] = useState(false);
 
     const { data, setData, post, errors, processing, recentlySuccessful } = useForm<ProfileForm>({
         name: auth.user.name,
@@ -39,6 +40,14 @@ export default function Profile() {
         cover_photo: null,
         _method: 'patch',
     });
+
+    useEffect(() => {
+        const hasNameChange = data.name !== auth.user.name;
+        const hasAvatarChange = data.avatar !== null;
+        const hasCoverPhotoChange = data.cover_photo !== null;
+
+        setHasChanges(hasNameChange || hasAvatarChange || hasCoverPhotoChange);
+    }, [data, auth.user.name]);
 
     const updateProfile = (e: React.FormEvent) => {
         e.preventDefault();
@@ -156,7 +165,26 @@ export default function Profile() {
 
                             {/* Action Buttons */}
                             <div className="mt-4 flex items-center space-x-2 px-4 lg:mt-0">
-                                <Button type="submit" className="flex items-center gap-2 bg-blue-600 px-4 font-semibold hover:bg-blue-700">
+                                {hasChanges && (
+                                    <Button
+                                        type="submit"
+                                        className="flex items-center gap-2 bg-green-600 px-4 font-semibold hover:bg-green-700"
+                                        disabled={processing}
+                                    >
+                                        {processing ? (
+                                            <>
+                                                <i className="fas fa-spinner fa-spin" />
+                                                Saving...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <i className="fas fa-save" />
+                                                Save Changes
+                                            </>
+                                        )}
+                                    </Button>
+                                )}
+                                <Button type="button" className="flex items-center gap-2 bg-blue-600 px-4 font-semibold hover:bg-blue-700">
                                     <i className="fas fa-plus" />
                                     Add to story
                                 </Button>
@@ -170,6 +198,24 @@ export default function Profile() {
                                 </Button>
                             </div>
                         </div>
+
+                        {/* Show error messages if any */}
+                        {Object.keys(errors).length > 0 && (
+                            <div className="mt-4 rounded-md bg-red-50 p-4 dark:bg-red-900/50">
+                                <ul className="list-inside list-disc text-sm text-red-600 dark:text-red-400">
+                                    {Object.entries(errors).map(([key, value]) => (
+                                        <li key={key}>{value}</li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
+
+                        {/* Show success message */}
+                        {recentlySuccessful && (
+                            <div className="mt-4 rounded-md bg-green-50 p-4 text-sm text-green-600 dark:bg-green-900/50 dark:text-green-400">
+                                Profile updated successfully.
+                            </div>
+                        )}
                     </form>
 
                     {/* Navigation Tabs - Updated to Facebook style */}
