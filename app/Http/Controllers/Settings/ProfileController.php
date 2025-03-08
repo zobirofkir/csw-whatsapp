@@ -48,6 +48,12 @@ class ProfileController extends Controller
             );
         }
 
+        if ($request->hasFile('cover_photo')) {
+            // Store the cover photo in the public disk under 'cover-photos' directory
+            $path = $request->file('cover_photo')->store('cover-photos', 'public');
+            $userData['cover_photo'] = $path;
+        }
+
         $request->user()->update($userData);
 
         return to_route('profile.edit');

@@ -1,9 +1,8 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { type BreadcrumbItem, type PostType, type SharedData } from '@/types';
+import { type BreadcrumbItem, type FormDataType, type PageProps, type PostType, type SharedData } from '@/types';
 import { Head, useForm, usePage } from '@inertiajs/react';
 import { useRef } from 'react';
 
-import InputError from '@/components/input-error';
 import CreatePostForm from '@/components/posts/CreatePostForm';
 import Post from '@/components/posts/Post';
 import { Button } from '@/components/ui/button';
@@ -17,15 +16,20 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-interface ProfileForm extends Record<string, any> {
+interface ProfileForm extends FormDataType {
     name: string;
     avatar: File | null;
     cover_photo: File | null;
     _method: string;
 }
 
+interface CustomPageProps extends PageProps {
+    auth: SharedData['auth'];
+    userPosts: PostType[];
+}
+
 export default function Profile() {
-    const { auth, userPosts } = usePage<SharedData & { userPosts: PostType[] }>().props;
+    const { auth, userPosts } = usePage<CustomPageProps>().props;
     const fileInput = useRef<HTMLInputElement>(null);
     const coverPhotoInput = useRef<HTMLInputElement>(null);
 
@@ -80,33 +84,39 @@ export default function Profile() {
             <Head title="Profile" />
 
             <SettingsLayout>
-                {/* Cover Photo Section - Updated height and styling */}
-                <div className="relative h-[250px] w-full overflow-hidden bg-gray-200 sm:h-[350px] md:h-[400px] dark:bg-gray-700">
+                {/* Cover Photo Section - Updated to match Facebook dimensions */}
+                <div className="relative h-[200px] w-full overflow-hidden bg-gray-200 sm:h-[300px] lg:h-[350px] dark:bg-gray-700">
                     <img
-                        src={data.cover_photo ? URL.createObjectURL(data.cover_photo) : auth.user.cover_photo || '/images/default-cover.jpg'}
+                        src={
+                            data.cover_photo
+                                ? URL.createObjectURL(data.cover_photo)
+                                : auth.user.cover_photo
+                                  ? `/storage/${auth.user.cover_photo}`
+                                  : '/images/default-cover.jpg'
+                        }
                         alt="Cover"
                         className="h-full w-full object-cover"
                     />
-                    <div className="absolute right-2 bottom-2 flex space-x-2 sm:right-4 sm:bottom-4">
+                    <div className="absolute right-4 bottom-4 flex space-x-2">
                         <Button
                             variant="secondary"
-                            className="bg-white/90 text-xs hover:bg-white/80 sm:text-sm dark:bg-gray-800/90 dark:hover:bg-gray-800/80"
+                            className="flex items-center gap-2 bg-white/95 px-4 py-2 text-sm font-semibold text-black hover:bg-white/90 dark:bg-black/75 dark:text-white dark:hover:bg-black/60"
                             onClick={() => coverPhotoInput.current?.click()}
                         >
-                            <i className="fas fa-camera mr-1 sm:mr-2" />
-                            <span className="hidden sm:inline">Edit Cover Photo</span>
-                            <span className="sm:hidden">Edit</span>
+                            <i className="fas fa-camera" />
+                            Edit cover photo
                         </Button>
                     </div>
                     <input type="file" ref={coverPhotoInput} className="hidden" onChange={handleCoverPhotoChange} accept="image/*" />
                 </div>
 
-                {/* Profile Header Section - Updated for responsiveness */}
-                <div className="relative mx-auto max-w-[1095px] px-2 sm:px-4">
+                {/* Profile Header Section - Updated to Facebook style */}
+                <div className="relative mx-auto max-w-[1095px] px-4">
                     <form onSubmit={updateProfile} className="space-y-6">
-                        <div className="-mt-[28px] flex flex-col items-center border-b border-gray-200 pb-4 sm:flex-row sm:items-end sm:items-start sm:space-x-5 dark:border-gray-700">
-                            <div className="relative z-10 sm:ml-8">
-                                <Avatar className="h-[120px] w-[120px] ring-4 ring-white sm:h-[168px] sm:w-[168px] dark:ring-gray-800">
+                        <div className="relative flex flex-col border-b border-gray-200 pb-4 lg:flex-row lg:items-end lg:pb-0 dark:border-gray-700">
+                            {/* Profile Picture */}
+                            <div className="relative -mt-[85px] ml-4 lg:-mt-[132px]">
+                                <Avatar className="h-[168px] w-[168px] rounded-full border-4 border-white ring-0 dark:border-gray-900">
                                     <AvatarImage
                                         src={
                                             data.avatar
@@ -117,124 +127,131 @@ export default function Profile() {
                                                     ? `/storage/${auth.user.avatar}`
                                                     : undefined
                                         }
+                                        className="rounded-full object-cover"
                                     />
                                     <AvatarFallback>{auth.user.name.charAt(0)}</AvatarFallback>
                                 </Avatar>
-                                <input type="file" ref={fileInput} className="hidden" onChange={handleAvatarChange} accept="image/*" />
                                 <Button
                                     type="button"
                                     variant="secondary"
-                                    className="absolute right-1 bottom-1 h-6 w-6 rounded-full bg-gray-200 p-0 hover:bg-gray-300 sm:right-2 sm:bottom-2 sm:h-8 sm:w-8 dark:bg-gray-700"
+                                    className="absolute right-2 bottom-2 h-10 w-10 rounded-full bg-gray-200 p-0 hover:bg-gray-300 dark:bg-gray-700"
                                     onClick={() => fileInput.current?.click()}
                                 >
-                                    <i className="fas fa-camera text-xs sm:text-sm" />
+                                    <i className="fas fa-camera" />
                                 </Button>
-                                {errors.avatar && <InputError message={errors.avatar} className="mt-2" />}
+                                <input type="file" ref={fileInput} className="hidden" onChange={handleAvatarChange} accept="image/*" />
                             </div>
 
-                            <div className="mt-4 flex-1 text-center sm:mt-0 sm:text-left">
+                            {/* Name and Friends Count */}
+                            <div className="flex flex-1 flex-col px-4 pt-4 lg:pt-0">
                                 <input
                                     type="text"
                                     value={data.name}
                                     onChange={(e) => setData('name', e.target.value)}
-                                    className="w-full border-0 bg-transparent p-0 text-center text-2xl font-bold text-gray-900 focus:ring-0 sm:text-left sm:text-[32px] dark:text-white"
+                                    className="w-full border-0 bg-transparent p-0 text-3xl font-bold text-gray-900 focus:ring-0 dark:text-white"
                                     placeholder="Your name"
                                 />
-                                {errors.name && <InputError message={errors.name} className="mt-1" />}
-                                <p className="text-sm text-gray-500 sm:text-[15px] dark:text-gray-400">500 friends</p>
+                                <p className="text-[15px] text-gray-500 dark:text-gray-400">500 friends</p>
                             </div>
 
-                            <div className="mt-4 flex justify-center space-x-3 sm:mt-0 sm:justify-start">
-                                <Button type="submit" variant="default" disabled={processing} className="text-sm sm:text-base">
-                                    Save Changes
+                            {/* Action Buttons */}
+                            <div className="mt-4 flex items-center space-x-2 px-4 lg:mt-0">
+                                <Button type="submit" className="flex items-center gap-2 bg-blue-600 px-4 font-semibold hover:bg-blue-700">
+                                    <i className="fas fa-plus" />
+                                    Add to story
+                                </Button>
+                                <Button
+                                    type="button"
+                                    variant="secondary"
+                                    className="flex items-center gap-2 bg-gray-200 px-4 font-semibold text-black hover:bg-gray-300 dark:bg-gray-700 dark:text-white"
+                                >
+                                    <i className="fas fa-pen" />
+                                    Edit profile
                                 </Button>
                             </div>
                         </div>
                     </form>
 
-                    {/* Navigation Tabs - Updated for responsiveness */}
-                    <div className="overflow-x-auto border-b border-gray-200 dark:border-gray-700">
-                        <nav className="-mb-px flex min-w-max space-x-1">
+                    {/* Navigation Tabs - Updated to Facebook style */}
+                    <div className="mt-1 border-b border-gray-200 dark:border-gray-700">
+                        <nav className="-mb-px flex space-x-1">
                             <a
                                 href="#"
-                                className="border-b-[3px] border-blue-600 px-3 py-3 text-sm font-semibold text-blue-600 sm:px-4 sm:py-4 sm:text-[15px]"
+                                className="border-b-[3px] border-blue-600 px-4 py-4 text-[15px] font-semibold text-blue-600"
+                                aria-current="page"
                             >
                                 Posts
                             </a>
                             <a
                                 href="#"
-                                className="px-3 py-3 text-sm font-medium text-gray-500 hover:bg-gray-100 sm:px-4 sm:py-4 sm:text-[15px] dark:hover:bg-gray-800"
+                                className="px-4 py-4 text-[15px] font-medium text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
                             >
                                 About
                             </a>
                             <a
                                 href="#"
-                                className="px-3 py-3 text-sm font-medium text-gray-500 hover:bg-gray-100 sm:px-4 sm:py-4 sm:text-[15px] dark:hover:bg-gray-800"
+                                className="px-4 py-4 text-[15px] font-medium text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
                             >
                                 Friends
                             </a>
                             <a
                                 href="#"
-                                className="px-3 py-3 text-sm font-medium text-gray-500 hover:bg-gray-100 sm:px-4 sm:py-4 sm:text-[15px] dark:hover:bg-gray-800"
+                                className="px-4 py-4 text-[15px] font-medium text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
                             >
                                 Photos
                             </a>
                             <a
                                 href="#"
-                                className="px-3 py-3 text-sm font-medium text-gray-500 hover:bg-gray-100 sm:px-4 sm:py-4 sm:text-[15px] dark:hover:bg-gray-800"
+                                className="px-4 py-4 text-[15px] font-medium text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
                             >
                                 Videos
                             </a>
                         </nav>
                     </div>
 
-                    {/* Main Content Area - Updated grid for responsiveness */}
-                    <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-[minmax(250px,360px)_1fr]">
+                    {/* Main Content Area - Updated grid layout */}
+                    <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-[360px_1fr]">
                         {/* Left Sidebar */}
                         <div className="space-y-4">
-                            <div className="rounded-lg bg-white p-3 shadow sm:p-4 dark:bg-gray-800">
-                                <h2 className="text-[15px] font-semibold sm:text-[17px]">Intro</h2>
-                                <div className="mt-2 space-y-2 sm:mt-3 sm:space-y-3">
+                            <div className="rounded-lg bg-white p-4 shadow dark:bg-gray-800">
+                                <h2 className="text-[17px] font-semibold">Intro</h2>
+                                <div className="mt-3 space-y-3">
                                     <Button
-                                        variant="outline"
-                                        className="w-full justify-center bg-gray-100 text-sm font-medium hover:bg-gray-200 sm:text-base dark:bg-gray-700 dark:hover:bg-gray-600"
+                                        variant="secondary"
+                                        className="w-full justify-center bg-gray-100 font-medium hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600"
                                     >
-                                        Add Bio
+                                        Add bio
                                     </Button>
                                     <Button
-                                        variant="outline"
-                                        className="w-full justify-center bg-gray-100 text-sm font-medium hover:bg-gray-200 sm:text-base dark:bg-gray-700 dark:hover:bg-gray-600"
+                                        variant="secondary"
+                                        className="w-full justify-center bg-gray-100 font-medium hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600"
                                     >
-                                        Add Hobbies
+                                        Edit details
                                     </Button>
                                     <Button
-                                        variant="outline"
-                                        className="w-full justify-center bg-gray-100 text-sm font-medium hover:bg-gray-200 sm:text-base dark:bg-gray-700 dark:hover:bg-gray-600"
+                                        variant="secondary"
+                                        className="w-full justify-center bg-gray-100 font-medium hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600"
                                     >
-                                        Add Featured
+                                        Add featured
                                     </Button>
                                 </div>
                             </div>
 
                             {/* Photos Section */}
-                            <div className="rounded-lg bg-white p-3 shadow sm:p-4 dark:bg-gray-800">
+                            <div className="rounded-lg bg-white p-4 shadow dark:bg-gray-800">
                                 <div className="flex items-center justify-between">
-                                    <h2 className="text-[15px] font-semibold sm:text-[17px]">Photos</h2>
-                                    <a
-                                        href="#"
-                                        className="rounded px-2 py-1 text-sm font-medium text-blue-600 hover:bg-gray-100 sm:text-[15px] dark:hover:bg-gray-700"
-                                    >
-                                        See All
+                                    <h2 className="text-[17px] font-semibold">Photos</h2>
+                                    <a href="#" className="text-[15px] font-medium text-blue-600 hover:bg-gray-100 dark:hover:bg-gray-700">
+                                        See all photos
                                     </a>
                                 </div>
-                                <div className="mt-2 grid grid-cols-3 gap-1 sm:mt-3 sm:gap-2">{/* Add photo grid here */}</div>
+                                <div className="mt-3 grid grid-cols-3 gap-2">{/* Photo grid will go here */}</div>
                             </div>
                         </div>
 
                         {/* Main Content - Posts */}
                         <div className="space-y-4">
                             <CreatePostForm />
-
                             {/* Posts List */}
                             <div className="space-y-4">
                                 {userPosts.length > 0 ? (

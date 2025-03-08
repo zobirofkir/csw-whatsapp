@@ -16,6 +16,7 @@ class UpdateProfileRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'avatar' => ['nullable', 'image', 'max:1024'], // Max 1MB
+            'cover_photo' => ['nullable', 'image', 'max:2048'], // Max 2MB
         ];
     }
 }
