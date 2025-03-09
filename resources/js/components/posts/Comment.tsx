@@ -1,4 +1,4 @@
-import type { Comment as CommentType } from './types';
+import type { Comment as CommentType } from '../../types/types';
 
 interface CommentProps {
     comment: CommentType;
@@ -61,7 +61,11 @@ export function Comment({
                             }}
                             className="flex items-center space-x-2"
                         >
-                            <img src={userAvatar?.startsWith('http') ? userAvatar : userAvatar ? `/storage/${userAvatar}` : undefined} alt="Your avatar" className="h-6 w-6 rounded-full" />
+                            <img
+                                src={userAvatar?.startsWith('http') ? userAvatar : userAvatar ? `/storage/${userAvatar}` : undefined}
+                                alt="Your avatar"
+                                className="h-6 w-6 rounded-full"
+                            />
                             <div className="relative flex-1">
                                 <input
                                     type="text"

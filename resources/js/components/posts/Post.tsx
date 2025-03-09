@@ -1,10 +1,10 @@
 import { router } from '@inertiajs/react';
 import axios from 'axios';
 import { useEffect, useRef, useState } from 'react';
+import { getMediaAspectClass, getMediaGridClass } from '../../types/mediaUtils';
+import type { PostProps, ReactionCounts } from '../../types/types';
+import { REACTIONS } from '../../types/types';
 import { Comment } from './Comment';
-import { getMediaAspectClass, getMediaGridClass } from './mediaUtils';
-import type { PostProps, ReactionCounts } from './types';
-import { REACTIONS } from './types';
 
 export default function Post({ post }: PostProps) {
     const [comments, setComments] = useState(post.comments);
