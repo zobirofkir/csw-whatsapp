@@ -1,4 +1,4 @@
-import CreatePostForm from '@/components/posts/CreatePostForm';
+import CreatePostForm from '@/components/forms/CreatePostForm';
 import PostList from '@/components/posts/PostList';
 import StoriesContainer from '@/components/stories/StoriesContainer';
 import AppLayout from '@/layouts/app-layout';

@@ -4,8 +4,8 @@ import Picker from '@emoji-mart/react';
 import { usePage } from '@inertiajs/react';
 import axios from 'axios';
 import { useRef, useState } from 'react';
-import { MediaPreview } from './MediaPreview';
-import { PostActionButton } from './PostActionButton';
+import { MediaPreview } from '../media/MediaPreview';
+import { PostActionButton } from '../buttons/PostActionButton';
 
 // Constants
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/jpg'];
@@ -183,7 +183,7 @@ export default function CreatePostForm() {
 
             {showEmojiPicker && (
                 <>
-                    <div className="fixed inset-0 z-40 bg-opacity-50 backdrop-blur-sm" />
+                    <div className="bg-opacity-50 fixed inset-0 z-40 backdrop-blur-sm" />
                     <div className="fixed inset-0 z-50 flex items-center justify-center">
                         <div className="relative rounded-lg bg-white p-4 dark:bg-gray-800">
                             <button
@@ -203,7 +203,6 @@ export default function CreatePostForm() {
                     </div>
                 </>
             )}
-
         </div>
     );
 }

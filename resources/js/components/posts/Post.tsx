@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { getMediaAspectClass, getMediaGridClass } from '../../types/mediaUtils';
 import type { PostProps, ReactionCounts } from '../../types/types';
 import { REACTIONS } from '../../types/types';
-import { Comment } from './Comment';
+import { Comment } from '../comments/Comment';
 
 export default function Post({ post }: PostProps) {
     const [comments, setComments] = useState(post.comments);
