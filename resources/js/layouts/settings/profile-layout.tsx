@@ -48,7 +48,7 @@ export default function ProfileLayout({ children }: ProfileLayoutProps) {
             />
 
             <div className="pt-16">
-                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <div className="mx-auto">
                     <div className="flex">
                         <div className="mx-auto w-full lg:w-3/4">{children}</div>
                     </div>

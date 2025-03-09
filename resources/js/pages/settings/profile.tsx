@@ -124,7 +124,7 @@ export default function Profile() {
             <SettingsLayout>
                 <CoverPhotoSection coverPhoto={data.cover_photo} userCoverPhoto={auth.user.cover_photo} onCoverPhotoChange={handleCoverPhotoChange} />
 
-                <div className="relative mx-auto max-w-[1095px] px-4">
+                <div className="relative">
                     <ProfileHeader
                         data={data}
                         auth={auth}
