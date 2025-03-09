@@ -26,7 +26,7 @@ export default function CoverPhotoSectionComponent({ coverPhoto, userCoverPhoto,
             <div className="absolute right-4 bottom-4 flex space-x-2">
                 <Button
                     variant="secondary"
-                    className="flex items-center gap-2 bg-white/95 px-4 py-2 text-sm font-semibold text-black hover:bg-white/90 dark:bg-black/75 dark:text-white dark:hover:bg-black/60"
+                    className="flex items-center gap-2 bg-white/95 px-2 py-2 text-sm font-semibold text-black hover:bg-white/90 dark:bg-black/75 dark:text-white dark:hover:bg-black/60 z-10"
                     onClick={() => coverPhotoInput.current?.click()}
                 >
                     <i className="fas fa-camera" />
