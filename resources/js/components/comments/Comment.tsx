@@ -39,7 +39,7 @@ export function Comment({
             <div className="flex-1">
                 <div className="rounded-2xl bg-gray-100 px-3 py-2 dark:bg-gray-700">
                     <p className="text-sm font-semibold">{comment.user.name}</p>
-                    <p className="text-sm">{comment.content}</p>
+                    <p className="text-sm whitespace-pre-wrap break-words">{comment.content}</p>
                 </div>
                 <div className="mt-1 flex space-x-3 text-xs text-gray-500">
                     {!isReply && (
