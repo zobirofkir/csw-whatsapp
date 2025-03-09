@@ -207,7 +207,15 @@ export default function Post({ post }: PostProps) {
             {states.showComments && (
                 <div className="animate-fadeIn px-4 py-2">
                     <form onSubmit={handlers.handleComment} className="mb-4 flex items-center space-x-2">
-                        <img src={post.user.avatar} alt="Your avatar" className="h-8 w-8 rounded-full" />
+                        <img src={
+                            post.user.avatar?.startsWith('http')
+                            ? post.user.avatar
+                            : post.user.avatar
+                                ? `/storage/${post.user.avatar}`
+                                : undefined
+                            }
+                            alt="Your avatar"
+                            className="h-8 w-8 rounded-full" />
                         <div className="relative flex-1">
                             <input
                                 type="text"
