@@ -36,18 +36,10 @@ export default function ProfileHeaderComponent({ data, auth, hasChanges, process
             className="relative flex flex-col border-b border-gray-200 pb-4 lg:flex-row lg:items-end lg:pb-0 dark:border-gray-700"
         >
             <div className="relative -mt-[85px] ml-4 lg:-mt-[132px]">
-                <Avatar className="h-[168px] w-[168px] rounded-full border-4 border-white ring-0 dark:border-gray-900">
+                <Avatar className="h-[168px] w-[168px] rounded-full border-4 border-white ring-0 dark:border-gray-900" onClick={() => fileInput.current?.click()}>
                     <AvatarImage src={getAvatarUrl()} className="rounded-full object-cover" />
                     <AvatarFallback>{auth.user.name.charAt(0)}</AvatarFallback>
                 </Avatar>
-                <Button
-                    type="button"
-                    variant="secondary"
-                    className="absolute right-2 bottom-2 h-10 w-10 rounded-full bg-gray-200 p-0 hover:bg-gray-300 dark:bg-gray-700"
-                    onClick={() => fileInput.current?.click()}
-                >
-                    <i className="fas fa-camera" />
-                </Button>
                 <input type="file" ref={fileInput} className="hidden" onChange={onAvatarChange} accept="image/*" />
             </div>
 
