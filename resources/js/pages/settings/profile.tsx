@@ -2,13 +2,13 @@ import { type BreadcrumbItem, type FormDataType, type PageProps, type PostType, 
 import { Head, useForm, usePage } from '@inertiajs/react';
 import { useEffect, useRef, useState } from 'react';
 
-import CoverPhotoSection from '@/components/profile/CoverPhotoSection';
-import ProfileIntroSection from '@/components/profile/ProfileIntroSection';
-import PostsList from '@/components/profile/PostsList';
+import CoverPhotoSection from '@/components/profile/CoverPhotoSectionComponent';
+import ProfileIntroSection from '@/components/profile/ProfileIntroSectionComponent';
+import PostsList from '@/components/profile/PostsListComponent';
 import SettingsLayout from '@/layouts/settings/layout';
 import ProfileLayout from '@/layouts/settings/profile-layout';
-import ProfileHeader from '@/components/profile/ProfileHeader';
-import ProfileTabs from '@/components/profile/ProfileTabs';
+import ProfileHeader from '@/components/profile/ProfileHeaderComponent';
+import ProfileTabs from '@/components/profile/ProfileTabsComponent';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {

@@ -14,7 +14,7 @@ interface Props {
     onAvatarChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-export default function ProfileHeader({ data, auth, hasChanges, processing, onSubmit, onNameChange, onAvatarChange }: Props) {
+export default function ProfileHeaderComponent({ data, auth, hasChanges, processing, onSubmit, onNameChange, onAvatarChange }: Props) {
     const fileInput = useRef<HTMLInputElement>(null);
 
     const getAvatarUrl = () => {

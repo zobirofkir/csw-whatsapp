@@ -1,4 +1,4 @@
-export default function ProfileTabs() {
+export default function ProfileTabsComponent() {
     return (
         <div className="mt-1 border-b border-gray-200 dark:border-gray-700">
             <nav className="-mb-px flex space-x-1">

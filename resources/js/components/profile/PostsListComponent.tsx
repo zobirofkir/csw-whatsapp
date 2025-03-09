@@ -6,7 +6,7 @@ interface Props {
     userPosts: PostType[];
 }
 
-export default function PostsList({ userPosts }: Props) {
+export default function PostsListComponent({ userPosts }: Props) {
     return (
         <div className="space-y-4">
             <CreatePostForm />

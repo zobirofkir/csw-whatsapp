@@ -11,7 +11,7 @@ interface Props {
     onSubmit: (e: React.FormEvent) => void;
 }
 
-export default function ProfileIntroSection({ introForm, activeIntroForm, setIntroForm, setActiveIntroForm, onSubmit }: Props) {
+export default function ProfileIntroSectionComponent({ introForm, activeIntroForm, setIntroForm, setActiveIntroForm, onSubmit }: Props) {
     return (
         <div className="rounded-lg bg-white p-4 shadow dark:bg-gray-800">
             <h2 className="text-[17px] font-semibold">Intro</h2>

@@ -7,7 +7,7 @@ interface Props {
     onCoverPhotoChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-export default function CoverPhotoSection({ coverPhoto, userCoverPhoto, onCoverPhotoChange }: Props) {
+export default function CoverPhotoSectionComponent({ coverPhoto, userCoverPhoto, onCoverPhotoChange }: Props) {
     const coverPhotoInput = useRef<HTMLInputElement>(null);
 
     return (
