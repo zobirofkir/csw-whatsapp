@@ -35,7 +35,7 @@ export default function Sidebar({ isMobile, showMobileMenu, setShowMobileMenu }:
                         showMobileMenu ? 'translate-x-0' : '-translate-x-full'
                     }`}
                 >
-                    <div className="space-y-0.5 p-2">
+                    <div className="space-y-0.5 p-2 mt-[100px]">
                         <SidebarLink href="/settings/profile">
                             <ProfileLink />
                         </SidebarLink>
