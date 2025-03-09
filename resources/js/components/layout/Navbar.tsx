@@ -34,7 +34,7 @@ export default function Navbar({ darkMode, toggleDarkMode, isMobile, showMobileM
     }, []);
 
     return (
-        <nav className="fixed z-10 w-full bg-white shadow-md dark:bg-gray-800">
+        <nav className="fixed z-[9999] w-full bg-white shadow-md dark:bg-gray-800">
             <div className="mx-auto max-w-7xl px-2 sm:px-4">
                 <div className="flex h-16 items-center justify-between">
                     {/* Logo and Search Container */}
