@@ -1,4 +1,4 @@
-import { usePost } from '../../hooks/usePost';
+import { usePost } from '../../hooks/use-post';
 import { getMediaAspectClass, getMediaGridClass } from '../../types/mediaUtils';
 import type { PostProps } from '../../types/types';
 import { REACTIONS } from '../../types/types';
