@@ -18,7 +18,7 @@ export default function CoverPhotoSectionComponent({ coverPhoto, userCoverPhoto,
                         ? URL.createObjectURL(coverPhoto)
                         : userCoverPhoto
                           ? `/storage/${userCoverPhoto}`
-                          : '/images/default-cover.jpg'
+                          : 'https://www.pngarts.com/files/10/Default-Profile-Picture-PNG-Transparent-Image.png'
                 }
                 alt="Cover"
                 className="h-full w-full object-cover"

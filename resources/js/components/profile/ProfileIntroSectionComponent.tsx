@@ -33,16 +33,17 @@ export default function ProfileIntroSectionComponent({ introForm, activeIntroFor
     };
 
     return (
-        <div className="rounded-lg bg-white p-4 shadow dark:bg-gray-800">
+        <div className="rounded-lg bg-white p-4 shadow dark:bg-gray-800 md:p-5">
             <h2 className="text-[17px] font-semibold">Intro</h2>
-            <div className="mt-3 space-y-3">
+            <div className="mt-4 space-y-4">
+                {/* Bio Section */}
                 {activeIntroForm === 'bio' ? (
                     <form onSubmit={handleSubmit} className="space-y-3">
                         <Textarea
-                            placeholder="Write something about yourself..."
+                            placeholder="Describe who you are"
                             value={introForm.bio}
                             onChange={(e) => setIntroForm({ ...introForm, bio: e.target.value })}
-                            className="min-h-[100px]"
+                            className="min-h-[100px] text-sm"
                         />
                         <div className="flex justify-end space-x-2">
                             <Button type="button" variant="secondary" onClick={() => setActiveIntroForm(null)}>
@@ -54,35 +55,40 @@ export default function ProfileIntroSectionComponent({ introForm, activeIntroFor
                 ) : (
                     <Button
                         variant="secondary"
-                        className="w-full justify-center bg-gray-100 font-medium hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600"
+                        className="w-full justify-center bg-gray-100 py-2.5 text-sm font-medium hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600"
                         onClick={() => setActiveIntroForm('bio')}
                     >
                         {introForm.bio ? 'Edit bio' : 'Add bio'}
                     </Button>
                 )}
 
+                {/* Details Section */}
                 {activeIntroForm === 'details' ? (
                     <form onSubmit={handleSubmit} className="space-y-3">
-                        <div className="space-y-2">
+                        <div className="space-y-2.5">
                             <Input
-                                placeholder="Work"
+                                placeholder="Add work"
                                 value={introForm.work}
                                 onChange={(e) => setIntroForm({ ...introForm, work: e.target.value })}
+                                className="text-sm"
                             />
                             <Input
-                                placeholder="Education"
+                                placeholder="Add education"
                                 value={introForm.education}
                                 onChange={(e) => setIntroForm({ ...introForm, education: e.target.value })}
+                                className="text-sm"
                             />
                             <Input
-                                placeholder="Location"
+                                placeholder="Add current city"
                                 value={introForm.location}
                                 onChange={(e) => setIntroForm({ ...introForm, location: e.target.value })}
+                                className="text-sm"
                             />
                             <Input
-                                placeholder="Relationship Status"
+                                placeholder="Add relationship status"
                                 value={introForm.relationship}
                                 onChange={(e) => setIntroForm({ ...introForm, relationship: e.target.value })}
+                                className="text-sm"
                             />
                         </div>
                         <div className="flex justify-end space-x-2">
@@ -95,7 +101,7 @@ export default function ProfileIntroSectionComponent({ introForm, activeIntroFor
                 ) : (
                     <Button
                         variant="secondary"
-                        className="w-full justify-center bg-gray-100 font-medium hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600"
+                        className="w-full justify-center bg-gray-100 py-2.5 text-sm font-medium hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600"
                         onClick={() => setActiveIntroForm('details')}
                     >
                         {Object.values(introForm).some(Boolean) ? 'Edit details' : 'Add details'}
@@ -104,27 +110,31 @@ export default function ProfileIntroSectionComponent({ introForm, activeIntroFor
 
                 {/* Display saved intro information */}
                 {(introForm.bio || introForm.work || introForm.education || introForm.location || introForm.relationship) && (
-                    <div className="mt-4 space-y-2 text-sm">
-                        {introForm.bio && <p>{introForm.bio}</p>}
+                    <div className="space-y-2.5 text-[15px] text-gray-700 dark:text-gray-300">
+                        {introForm.bio && <p className="whitespace-pre-wrap">{introForm.bio}</p>}
                         {introForm.work && (
-                            <p className="flex items-center gap-2">
-                                <i className="fas fa-briefcase" /> Works at {introForm.work}
-                            </p>
+                            <div className="flex items-center gap-2.5">
+                                <span className="text-xl">💼</span>
+                                <p>Works at <span className="font-semibold">{introForm.work}</span></p>
+                            </div>
                         )}
                         {introForm.education && (
-                            <p className="flex items-center gap-2">
-                                <i className="fas fa-graduation-cap" /> Studied at {introForm.education}
-                            </p>
+                            <div className="flex items-center gap-2.5">
+                                <span className="text-xl">🎓</span>
+                                <p>Studied at <span className="font-semibold">{introForm.education}</span></p>
+                            </div>
                         )}
                         {introForm.location && (
-                            <p className="flex items-center gap-2">
-                                <i className="fas fa-home" /> Lives in {introForm.location}
-                            </p>
+                            <div className="flex items-center gap-2.5">
+                                <span className="text-xl">📍</span>
+                                <p>Lives in <span className="font-semibold">{introForm.location}</span></p>
+                            </div>
                         )}
                         {introForm.relationship && (
-                            <p className="flex items-center gap-2">
-                                <i className="fas fa-heart" /> {introForm.relationship}
-                            </p>
+                            <div className="flex items-center gap-2.5">
+                                <span className="text-xl">❤️</span>
+                                <p className="font-semibold">{introForm.relationship}</p>
+                            </div>
                         )}
                     </div>
                 )}
