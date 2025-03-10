@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Settings;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\UpdateProfileBioRequest;
 use App\Http\Requests\UpdateProfileRequest;
 use App\Models\User;
 use App\Services\AvatarService;
@@ -76,16 +77,9 @@ class ProfileController extends Controller
     /**
      * Update the user's intro information.
      */
-    public function updateIntro(Request $request)
+    public function updateIntro(UpdateProfileBioRequest $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'bio' => ['nullable', 'string', 'max:500'],
-            'details' => ['nullable', 'array'],
-            'details.work' => ['nullable', 'string', 'max:255'],
-            'details.education' => ['nullable', 'string', 'max:255'],
-            'details.location' => ['nullable', 'string', 'max:255'],
-            'details.relationship' => ['nullable', 'string', 'max:255'],
-        ]);
+        $validated = $request->validated();
 
         $user = $request->user();
 
