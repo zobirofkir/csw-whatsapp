@@ -39,7 +39,11 @@ class ProfileController extends Controller
      */
     public function update(UpdateProfileRequest $request): RedirectResponse
     {
-        $userData = ['name' => $request->validated('name')];
+        $userData = [
+            'name' => $request->validated('name'),
+            'bio' => $request->validated('bio'),
+            'details' => $request->validated('details'),
+        ];
 
         if ($request->hasFile('avatar')) {
             $userData['avatar'] = $this->avatarService->updateAvatar(
@@ -67,5 +71,29 @@ class ProfileController extends Controller
         return $request->delete(
             using: fn (User $user) => $user->delete()
         );
+    }
+
+    /**
+     * Update the user's intro information.
+     */
+    public function updateIntro(Request $request)
+    {
+        $validated = $request->validate([
+            'bio' => ['nullable', 'string', 'max:500'],
+            'details' => ['nullable', 'array'],
+            'details.work' => ['nullable', 'string', 'max:255'],
+            'details.education' => ['nullable', 'string', 'max:255'],
+            'details.location' => ['nullable', 'string', 'max:255'],
+            'details.relationship' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        $user = $request->user();
+
+        $user->update([
+            'bio' => $validated['bio'],
+            'details' => $validated['details'],
+        ]);
+
+        return redirect()->back()->with('success', 'Profile intro updated successfully');
     }
 }

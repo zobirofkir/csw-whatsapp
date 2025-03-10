@@ -2,6 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { IntroForm } from '@/types/profile';
+import { router } from '@inertiajs/react';
 
 interface Props {
     introForm: IntroForm;
@@ -12,12 +13,31 @@ interface Props {
 }
 
 export default function ProfileIntroSectionComponent({ introForm, activeIntroForm, setIntroForm, setActiveIntroForm, onSubmit }: Props) {
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+
+        router.post(route('profile.update.intro'), {
+            bio: introForm.bio,
+            details: {
+                work: introForm.work,
+                education: introForm.education,
+                location: introForm.location,
+                relationship: introForm.relationship,
+            }
+        }, {
+            preserveScroll: true,
+            onSuccess: () => {
+                setActiveIntroForm(null);
+            },
+        });
+    };
+
     return (
         <div className="rounded-lg bg-white p-4 shadow dark:bg-gray-800">
             <h2 className="text-[17px] font-semibold">Intro</h2>
             <div className="mt-3 space-y-3">
                 {activeIntroForm === 'bio' ? (
-                    <form onSubmit={onSubmit} className="space-y-3">
+                    <form onSubmit={handleSubmit} className="space-y-3">
                         <Textarea
                             placeholder="Write something about yourself..."
                             value={introForm.bio}
@@ -42,7 +62,7 @@ export default function ProfileIntroSectionComponent({ introForm, activeIntroFor
                 )}
 
                 {activeIntroForm === 'details' ? (
-                    <form onSubmit={onSubmit} className="space-y-3">
+                    <form onSubmit={handleSubmit} className="space-y-3">
                         <div className="space-y-2">
                             <Input
                                 placeholder="Work"

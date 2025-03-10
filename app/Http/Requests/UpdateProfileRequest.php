@@ -17,6 +17,9 @@ class UpdateProfileRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             'avatar' => ['nullable', 'image', 'max:1024'], // Max 1MB
             'cover_photo' => ['nullable', 'image', 'max:2048'], // Max 2MB
+            'bio' => ['nullable', 'string', 'max:500'], // Max 500 characters for bio
+            'details' => ['nullable', 'array'], // Details as JSON/array
+            'details.*' => ['nullable', 'string', 'max:255'], // Validate each detail value
         ];
     }
 }

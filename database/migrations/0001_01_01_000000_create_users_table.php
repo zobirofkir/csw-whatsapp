@@ -20,6 +20,8 @@ return new class extends Migration
             $table->rememberToken();
             $table->text('avatar');
             $table->text('cover_photo')->nullable();
+            $table->text('bio')->nullable();
+            $table->json('details')->nullable();
             $table->timestamps();
         });
 

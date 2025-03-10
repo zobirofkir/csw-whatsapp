@@ -4,6 +4,7 @@ use App\Http\Controllers\PageController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ReactionController;
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\Settings\ProfileController;
 use Illuminate\Support\Facades\Route;
 use Laravel\WorkOS\Http\Middleware\ValidateSessionWithWorkOS;
 
@@ -18,6 +19,9 @@ Route::get('/', [PageController::class, 'welcome'])->name('home');
  */
 Route::controller(PageController::class)->middleware([ 'auth',ValidateSessionWithWorkOS::class ])->group(function () {
     Route::get('/account/auth/{username}', 'accountAuth')->name('account.auth');
+
+    // Add this new route for profile intro updates
+    Route::post('/profile/intro', [ProfileController::class, 'updateIntro'])->name('profile.update.intro');
 
     /**
      * Post Management Routes

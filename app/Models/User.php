@@ -23,6 +23,8 @@ class User extends Authenticatable
         'workos_id',
         'avatar',
         'cover_photo',
+        'bio',
+        'details',
     ];
 
     /**
@@ -45,6 +47,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'details' => 'array',
         ];
     }
 

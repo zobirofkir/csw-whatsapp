@@ -14,8 +14,8 @@ export interface ProfilePageProps extends PageProps {
 
 export interface IntroForm {
     bio: string;
-    work?: string;
-    education?: string;
-    location?: string;
-    relationship?: string;
+    work: string;
+    education: string;
+    location: string;
+    relationship: string;
 }
